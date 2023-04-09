@@ -1,5 +1,6 @@
 import ecdsa
 import random
+from pwn import *
 
 gen = ecdsa.curves.BRAINPOOLP256r1
 order = gen.order()
