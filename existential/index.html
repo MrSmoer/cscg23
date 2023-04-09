@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width" />
+<title>ECDSA: Handle with Care | Trail of Bits Blog</title>
+<link rel="profile" href="http://gmpg.org/xfn/11" />
+<link rel="pingback" href="https://blog.trailofbits.com/xmlrpc.php" />
+<!--[if lt IE 9]>
+<script src="https://blog.trailofbits.com/wp-content/themes/everyday/js/html5.js" type="text/javascript"></script>
+<![endif]-->
+
+<meta name='robots' content='max-image-preview:large' />
+<!-- Jetpack Site Verification Tags -->
+<meta name="google-site-verification" content="Lbyyor8qrpJf-6qi1ql45JDKAmXUIcc3N0mFeVNwUok" />
+<link rel='dns-prefetch' href='//s0.wp.com' />
+<link rel='dns-prefetch' href='//secure.gravatar.com' />
+<link rel='dns-prefetch' href='//stats.wp.com' />
+<link rel='dns-prefetch' href='//fonts-api.wp.com' />
+<link rel='dns-prefetch' href='//widgets.wp.com' />
+<link rel='dns-prefetch' href='//jetpack.wordpress.com' />
+<link rel='dns-prefetch' href='//public-api.wordpress.com' />
+<link rel='dns-prefetch' href='//0.gravatar.com' />
+<link rel='dns-prefetch' href='//1.gravatar.com' />
+<link rel='dns-prefetch' href='//2.gravatar.com' />
+<link rel='dns-prefetch' href='//i0.wp.com' />
+<link rel='dns-prefetch' href='//c0.wp.com' />
+<link href='https://fonts.gstatic.com' crossorigin rel='preconnect' />
+<link rel="alternate" type="application/rss+xml" title="Trail of Bits Blog &raquo; Feed" href="https://blog.trailofbits.com/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Trail of Bits Blog &raquo; Comments Feed" href="https://blog.trailofbits.com/comments/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Trail of Bits Blog &raquo; ECDSA: Handle with Care Comments Feed" href="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/feed/" />
+<script type="text/javascript">
+window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/14.0.0\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/14.0.0\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/blog.trailofbits.com\/wp-includes\/js\/wp-emoji-release.min.js?ver=6.2"}};
+/*! This file is auto-generated */
+!function(e,a,t){var n,r,o,i=a.createElement("canvas"),p=i.getContext&&i.getContext("2d");function s(e,t){p.clearRect(0,0,i.width,i.height),p.fillText(e,0,0);e=i.toDataURL();return p.clearRect(0,0,i.width,i.height),p.fillText(t,0,0),e===i.toDataURL()}function c(e){var t=a.createElement("script");t.src=e,t.defer=t.type="text/javascript",a.getElementsByTagName("head")[0].appendChild(t)}for(o=Array("flag","emoji"),t.supports={everything:!0,everythingExceptFlag:!0},r=0;r<o.length;r++)t.supports[o[r]]=function(e){if(p&&p.fillText)switch(p.textBaseline="top",p.font="600 32px Arial",e){case"flag":return s("\ud83c\udff3\ufe0f\u200d\u26a7\ufe0f","\ud83c\udff3\ufe0f\u200b\u26a7\ufe0f")?!1:!s("\ud83c\uddfa\ud83c\uddf3","\ud83c\uddfa\u200b\ud83c\uddf3")&&!s("\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f","\ud83c\udff4\u200b\udb40\udc67\u200b\udb40\udc62\u200b\udb40\udc65\u200b\udb40\udc6e\u200b\udb40\udc67\u200b\udb40\udc7f");case"emoji":return!s("\ud83e\udef1\ud83c\udffb\u200d\ud83e\udef2\ud83c\udfff","\ud83e\udef1\ud83c\udffb\u200b\ud83e\udef2\ud83c\udfff")}return!1}(o[r]),t.supports.everything=t.supports.everything&&t.supports[o[r]],"flag"!==o[r]&&(t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&t.supports[o[r]]);t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&!t.supports.flag,t.DOMReady=!1,t.readyCallback=function(){t.DOMReady=!0},t.supports.everything||(n=function(){t.readyCallback()},a.addEventListener?(a.addEventListener("DOMContentLoaded",n,!1),e.addEventListener("load",n,!1)):(e.attachEvent("onload",n),a.attachEvent("onreadystatechange",function(){"complete"===a.readyState&&t.readyCallback()})),(e=t.source||{}).concatemoji?c(e.concatemoji):e.wpemoji&&e.twemoji&&(c(e.twemoji),c(e.wpemoji)))}(window,document,window._wpemojiSettings);
+</script>
+<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 0.07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+	<link rel='stylesheet' id='all-css-ed731b56fac4c7746e2b67dee0ec82c4' href='https://blog.trailofbits.com/_static/??-eJyFUltuAjEMvFCD20ot9KPqDxIH6AGqbGIFg/NQnLDd2zfLQgUUyl8mmbFn7PRJmRgKhgKJq6Mg4GqDHWYHXSW20HE0W8XUZZ0HkDIwzozIQ/9XynqItSiXyZ4TKRiuFgU2Ah4taWT0o/IUpCbHrBidNsPMU7irbm+n+KqmYTCsRciosm48OaUdE/iqjiH6ZKKXNeww2JhB1xK9LoUMFPwuU0PVk3VY1D7k1ONwM3Jujedysq1PiqEx5P+xmrjfgcBvqCWm5g6DoQZWcamtHeBzMjPVZl1QbjrZYEnabMFHW0cN0xZvmJhmBrjDPFh95wNc1pW1zmj37sYjBXdP+dUygkRDmhVHF+UMXFvdZYVxGYfzSP3w70+vi8f52/z5ZfEDsY8fmw==' type='text/css' media='all' />
+<style id='wp-block-library-inline-css'>
+.has-text-align-justify{text-align:justify;}
+</style>
+<style id='global-styles-inline-css'>
+body{--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgba(252,185,0,1) 0%,rgba(255,105,0,1) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgba(255,105,0,1) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--duotone--dark-grayscale: url('#wp-duotone-dark-grayscale');--wp--preset--duotone--grayscale: url('#wp-duotone-grayscale');--wp--preset--duotone--purple-yellow: url('#wp-duotone-purple-yellow');--wp--preset--duotone--blue-red: url('#wp-duotone-blue-red');--wp--preset--duotone--midnight: url('#wp-duotone-midnight');--wp--preset--duotone--magenta-yellow: url('#wp-duotone-magenta-yellow');--wp--preset--duotone--purple-green: url('#wp-duotone-purple-green');--wp--preset--duotone--blue-orange: url('#wp-duotone-blue-orange');--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--font-family--albert-sans: 'Albert Sans';--wp--preset--font-family--alegreya: Alegreya;--wp--preset--font-family--arvo: Arvo;--wp--preset--font-family--bodoni-moda: 'Bodoni Moda';--wp--preset--font-family--cabin: Cabin;--wp--preset--font-family--chivo: Chivo;--wp--preset--font-family--commissioner: Commissioner;--wp--preset--font-family--cormorant: Cormorant;--wp--preset--font-family--courier-prime: 'Courier Prime';--wp--preset--font-family--crimson-pro: 'Crimson Pro';--wp--preset--font-family--dm-mono: 'DM Mono';--wp--preset--font-family--dm-sans: 'DM Sans';--wp--preset--font-family--domine: Domine;--wp--preset--font-family--eb-garamond: 'EB Garamond';--wp--preset--font-family--epilogue: Epilogue;--wp--preset--font-family--figtree: Figtree;--wp--preset--font-family--fira-sans: 'Fira Sans';--wp--preset--font-family--fraunces: Fraunces;--wp--preset--font-family--ibm-plex-mono: 'IBM Plex Mono';--wp--preset--font-family--ibm-plex-sans: 'IBM Plex Sans';--wp--preset--font-family--inter: Inter;--wp--preset--font-family--josefin-sans: 'Josefin Sans';--wp--preset--font-family--jost: Jost;--wp--preset--font-family--libre-baskerville: 'Libre Baskerville';--wp--preset--font-family--libre-franklin: 'Libre Franklin';--wp--preset--font-family--literata: Literata;--wp--preset--font-family--lora: Lora;--wp--preset--font-family--merriweather: Merriweather;--wp--preset--font-family--montserrat: Montserrat;--wp--preset--font-family--newsreader: Newsreader;--wp--preset--font-family--nunito: Nunito;--wp--preset--font-family--open-sans: 'Open Sans';--wp--preset--font-family--overpass: Overpass;--wp--preset--font-family--petrona: Petrona;--wp--preset--font-family--piazzolla: Piazzolla;--wp--preset--font-family--playfair-display: 'Playfair Display';--wp--preset--font-family--plus-jakarta-sans: 'Plus Jakarta Sans';--wp--preset--font-family--poppins: Poppins;--wp--preset--font-family--raleway: Raleway;--wp--preset--font-family--roboto-slab: 'Roboto Slab';--wp--preset--font-family--roboto: Roboto;--wp--preset--font-family--rubik: Rubik;--wp--preset--font-family--sora: Sora;--wp--preset--font-family--source-sans-pro: 'Source Sans Pro';--wp--preset--font-family--source-serif-pro: 'Source Serif Pro';--wp--preset--font-family--space-mono: 'Space Mono';--wp--preset--font-family--texturina: Texturina;--wp--preset--font-family--work-sans: 'Work Sans';--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgba(255, 255, 255, 1), 6px 6px rgba(0, 0, 0, 1);--wp--preset--shadow--crisp: 6px 6px 0px rgba(0, 0, 0, 1);}:where(.is-layout-flex){gap: 0.5em;}body .is-layout-flow > .alignleft{float: left;margin-inline-start: 0;margin-inline-end: 2em;}body .is-layout-flow > .alignright{float: right;margin-inline-start: 2em;margin-inline-end: 0;}body .is-layout-flow > .aligncenter{margin-left: auto !important;margin-right: auto !important;}body .is-layout-constrained > .alignleft{float: left;margin-inline-start: 0;margin-inline-end: 2em;}body .is-layout-constrained > .alignright{float: right;margin-inline-start: 2em;margin-inline-end: 0;}body .is-layout-constrained > .aligncenter{margin-left: auto !important;margin-right: auto !important;}body .is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)){max-width: var(--wp--style--global--content-size);margin-left: auto !important;margin-right: auto !important;}body .is-layout-constrained > .alignwide{max-width: var(--wp--style--global--wide-size);}body .is-layout-flex{display: flex;}body .is-layout-flex{flex-wrap: wrap;align-items: center;}body .is-layout-flex > *{margin: 0;}:where(.wp-block-columns.is-layout-flex){gap: 2em;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+:where(.wp-block-columns.is-layout-flex){gap: 2em;}
+.wp-block-pullquote{font-size: 1.5em;line-height: 1.6;}
+.wp-block-navigation a:where(:not(.wp-element-button)){color: inherit;}
+</style>
+<link rel='stylesheet' id='dashicons-css' href='https://blog.trailofbits.com/wp-includes/css/dashicons.min.css?ver=6.2' media='all' />
+<link rel='stylesheet' id='everyday-droid-serif-css' href='https://fonts-api.wp.com/css?family=Droid+Serif%3A400%2C700%2C400italic%2C700italic&#038;ver=20120328' media='all' />
+<link rel='stylesheet' id='everyday-droid-sans-css' href='https://fonts-api.wp.com/css?family=Droid+Sans%3A400%2C700&#038;ver=20120328' media='all' />
+<link rel='stylesheet' id='everyday-droid-mono-css' href='https://fonts-api.wp.com/css?family=Droid+Sans+Mono&#038;ver=20120328' media='all' />
+<style id='jetpack-global-styles-frontend-style-inline-css'>
+:root { --font-headings: unset; --font-base: unset; --font-headings-default: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif; --font-base-default: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;}
+</style>
+<script src='https://s0.wp.com/wp-content/plugins/video/assets/js/videojs/videopress-iframe-api.js?ver=202314' id='jetpack-videopress-video-block-view-iframe-api-js'></script>
+<script id='media-video-jwt-bridge-js-extra'>
+var videopressAjax = {"ajaxUrl":"https:\/\/blog.trailofbits.com\/wp-admin\/admin-ajax.php","bridgeUrl":"https:\/\/blog.trailofbits.com\/wp-content\/plugins\/jetpack\/jetpack_vendor\/automattic\/jetpack-videopress\/src\/..\/build\/lib\/token-bridge.js","post_id":"99991"};
+</script>
+<script src='https://blog.trailofbits.com/wp-content/plugins/jetpack/jetpack_vendor/automattic/jetpack-videopress/src/../build/lib/token-bridge.js?ver=0.13.6' id='media-video-jwt-bridge-js'></script>
+<script src='https://blog.trailofbits.com/wp-includes/js/jquery/jquery.min.js?ver=3.6.3' id='jquery-core-js'></script>
+<script type='text/javascript'  src='https://blog.trailofbits.com/wp-includes/js/jquery/jquery-migrate.min.js?m=1675717155'></script>
+<link rel="https://api.w.org/" href="https://blog.trailofbits.com/wp-json/" /><link rel="alternate" type="application/json" href="https://blog.trailofbits.com/wp-json/wp/v2/posts/99991" /><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://blog.trailofbits.com/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://blog.trailofbits.com/wp-includes/wlwmanifest.xml" />
+
+<link rel="canonical" href="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/" />
+<link rel='shortlink' href='https://blog.trailofbits.com/?p=99991' />
+<link rel="alternate" type="application/json+oembed" href="https://blog.trailofbits.com/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fblog.trailofbits.com%2F2020%2F06%2F11%2Fecdsa-handle-with-care%2F" />
+<link rel="alternate" type="text/xml+oembed" href="https://blog.trailofbits.com/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fblog.trailofbits.com%2F2020%2F06%2F11%2Fecdsa-handle-with-care%2F&#038;format=xml" />
+	<style>img#wpstats{display:none}</style>
+		<style>
+#page {
+	background-color: #f7f7f7;
+}
+</style>
+
+<meta name="description" content="The elliptic curve digital signature algorithm (ECDSA) is a common digital signature scheme that we see in many of our code reviews. It has some desirable properties, but can also be very fragile. For example, LadderLeak was published just a couple of weeks ago, which demonstrated the feasibility of key recovery with a side channel&hellip;" />
+<style type="text/css" id="custom-background-css">
+body.custom-background { background-image: url("https://blog.trailofbits.com/wp-content/themes/everyday/images/background.png"); background-position: left top; background-size: auto; background-repeat: repeat; background-attachment: scroll; }
+</style>
+				<style type="text/css">
+				/* If html does not have either class, do not show lazy loaded images. */
+				html:not( .jetpack-lazy-images-js-enabled ):not( .js ) .jetpack-lazy-image {
+					display: none;
+				}
+			</style>
+			<script>
+				document.documentElement.classList.add(
+					'jetpack-lazy-images-js-enabled'
+				);
+			</script>
+		
+<!-- Jetpack Open Graph Tags -->
+<meta property="og:type" content="article" />
+<meta property="og:title" content="ECDSA: Handle with Care" />
+<meta property="og:url" content="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/" />
+<meta property="og:description" content="The elliptic curve digital signature algorithm (ECDSA) is a common digital signature scheme that we see in many of our code reviews. It has some desirable properties, but can also be very fragile. …" />
+<meta property="article:published_time" content="2020-06-11T11:50:20+00:00" />
+<meta property="article:modified_time" content="2020-06-11T15:14:27+00:00" />
+<meta property="og:site_name" content="Trail of Bits Blog" />
+<meta property="og:image" content="https://blog.trailofbits.com/wp-content/uploads/2020/06/pasted-image-0.png" />
+<meta property="og:image:width" content="579" />
+<meta property="og:image:height" content="380" />
+<meta property="og:image:alt" content="" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:site" content="@trailofbits" />
+<meta name="twitter:text:title" content="ECDSA: Handle with Care" />
+<meta name="twitter:image" content="https://blog.trailofbits.com/wp-content/uploads/2020/06/pasted-image-0.png?w=640" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<!-- End Jetpack Open Graph Tags -->
+<link rel="icon" href="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/07/cropped-android-chrome-512x512-1.png?fit=32%2C32&#038;ssl=1" sizes="32x32" />
+<link rel="icon" href="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/07/cropped-android-chrome-512x512-1.png?fit=192%2C192&#038;ssl=1" sizes="192x192" />
+<link rel="apple-touch-icon" href="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/07/cropped-android-chrome-512x512-1.png?fit=180%2C180&#038;ssl=1" />
+<meta name="msapplication-TileImage" content="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/07/cropped-android-chrome-512x512-1.png?fit=270%2C270&#038;ssl=1" />
+<style type="text/css" id="wp-custom-css">/*
+Welcome to Custom CSS!
+
+To learn how this works, see http://wp.me/PEmnE-Bt
+*/
+.entry-content {
+	padding-left: 0;
+}
+
+.entry-content
+blockquote {
+	margin-left: 25px;
+}
+
+.entry-content
+.embed {
+	margin-left: 0;
+}
+
+.entry-content
+.embed-youtube {
+	margin-left: 0;
+}
+
+/* To remove the infinite scroll footer HC-23308875-SK */
+#infinite-footer
+{
+  display:none;
+}
+
+.wp-caption 
+.wp-caption-text {
+	text-align: center;
+}</style><!-- Your Google Analytics Plugin is missing the tracking ID -->
+</head>
+
+<body class="post-template-default single single-post postid-99991 single-format-standard custom-background group-blog">
+<div id="page" class="hfeed site">
+		<header id="masthead" class="site-header" role="banner">
+		<hgroup>
+			<h1 class="site-title"><a href="https://blog.trailofbits.com/" title="Trail of Bits Blog" rel="home">Trail of Bits Blog</a></h1>
+			<h2 class="site-description"></h2>
+					</hgroup>
+
+		<nav role="navigation" class="site-navigation main-navigation">
+			<h1 class="assistive-text">Menu</h1>
+			<div class="assistive-text skip-link"><a href="#content" title="Skip to content">Skip to content</a></div>
+			<div class="menu"><ul>
+<li ><a href="https://blog.trailofbits.com/">Home</a></li></ul></div>
+		</nav>
+	</header><!-- #masthead .site-header -->
+
+	<div id="main" class="main">
+		<div id="primary" class="site-content">
+			<div id="content" role="main">
+
+			
+				
+<article id="post-99991" class="post-99991 post type-post status-publish format-standard hentry category-cryptography entry">
+	<header class="entry-header">
+
+		<h1 class="entry-title">ECDSA: Handle with Care</h1>
+					<ul class="entry-meta">
+				<li class="entry-format">Post</li>
+				<li class="permalink"><a href="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/" title="7:50 am" rel="bookmark"><time class="entry-date" datetime="2020-06-11T07:50:20-04:00" pubdate>June 11, 2020</time></a></li>
+				<li class="comment-link"><a href="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/#comments">3 Comments</a></li>
+							</ul><!-- .entry-meta -->
+			</header><!-- .entry-header -->
+
+	<div class="entry-content">
+		<p>The elliptic curve digital signature algorithm (ECDSA) is a common digital signature scheme that we see in many of our code reviews. It has some desirable properties, but can also be very fragile. For example, <a href="https://eprint.iacr.org/2020/615.pdf">LadderLeak</a> was published just a couple of weeks ago, which demonstrated the feasibility of key recovery with a side channel attack that reveals less than one bit of the secret nonce.</p>
+<div id="attachment_100001" style="width: 310px" class="wp-caption aligncenter"><a href="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-24-at-4.19.11-pm.png?ssl=1"><img aria-describedby="caption-attachment-100001" data-attachment-id="100001" data-permalink="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/screen-shot-2020-04-24-at-4-19-11-pm/" data-orig-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-24-at-4.19.11-pm.png?fit=1394%2C1244&amp;ssl=1" data-orig-size="1394,1244" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Screen Shot 2020-04-24 at 4.19.11 PM" data-image-description data-image-caption data-medium-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-24-at-4.19.11-pm.png?fit=300%2C268&amp;ssl=1" data-large-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-24-at-4.19.11-pm.png?fit=690%2C616&amp;ssl=1" decoding="async" class="wp-image-100001 size-medium jetpack-lazy-image" src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-24-at-4.19.11-pm.png?resize=300%2C268&#038;ssl=1" alt width="300" height="268" data-recalc-dims="1" data-lazy-src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-24-at-4.19.11-pm.png?resize=300%2C268&amp;is-pending-load=1#038;ssl=1" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><noscript><img data-lazy-fallback="1" aria-describedby="caption-attachment-100001" data-attachment-id="100001" data-permalink="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/screen-shot-2020-04-24-at-4-19-11-pm/" data-orig-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-24-at-4.19.11-pm.png?fit=1394%2C1244&amp;ssl=1" data-orig-size="1394,1244" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Screen Shot 2020-04-24 at 4.19.11 PM" data-image-description="" data-image-caption="" data-medium-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-24-at-4.19.11-pm.png?fit=300%2C268&amp;ssl=1" data-large-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-24-at-4.19.11-pm.png?fit=690%2C616&amp;ssl=1" decoding="async" class="wp-image-100001 size-medium" src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-24-at-4.19.11-pm.png?resize=300%2C268&#038;ssl=1" alt="" width="300" height="268" data-recalc-dims="1"  /></noscript></a><p id="caption-attachment-100001" class="wp-caption-text">ECDSA is fragile and must be handled with care</p></div>
+<p>This post will walk you through:</p>
+<ul>
+<li>the various ways in which ECDSA nonce bias can be exploited</li>
+<li>how simple it is to attack in practice when things go wrong, and</li>
+<li>how to protect yourself.</li>
+</ul>
+<p>You’re probably familiar with attacks against ECDSA. Some attacks are trivial, and some involve advanced Fourier analysis and lattice math. Although these attacks can be complicated, I hope this post will demonstrate that they are easy to implement in practice. In fact, even if you don’t know anything about lattices, after reading this blog post you will be able to leverage a lattice attack to break ECDSA signatures produced with a very slightly faulty RNG using less than 100 lines of python code.</p>
+<p><em>Math disclaimer: to read this post, you will need to be somewhat familiar with </em><a href="https://en.wikipedia.org/wiki/Group_(mathematics)"><em>mathematical groups</em></a><em>, recognizing that they have a binary operation and a group generator. You do not need to be an expert on elliptic curves; you just need to know that elliptic curves can be used to form a mathematical group (and, thus, have a concept of addition and scalar multiplication). Familiarity with other math concepts like lattices is helpful, but not required.</em></p>
+<h2>DSA primer</h2>
+<p>ECDSA is a specific form of the digital signature algorithm (DSA). DSA is a pretty common <a href="https://en.wikipedia.org/wiki/Digital_signature">digital signature scheme</a>, and is defined with three algorithms: key generation, signing, and verification. The key generation algorithm generates a private and public key; the private key is responsible for creating signatures; and the public key is responsible for verifying signatures. The signature algorithm takes as input a message and private key, and produces a signature. The verification algorithm takes as input a message, signature, and public key, and returns true or false, indicating whether the signature is valid.</p>
+<p>DSA is defined over any mathematical group, and this scheme is secure as long as the <a href="https://en.wikipedia.org/wiki/Discrete_logarithm">discrete log</a> problem is hard over this group. The group typically used is the integers modulo a prime, <em>p</em>. Along with this group, we will have a group generator, <em>g</em>, and some cryptographically secure hash function, <em>H</em>. We can assume that <em>p</em>, <em>g</em>, and <em>H</em> will all be publicly known.</p>
+<p>Key generation works by first randomly selecting a value, <em>x</em>, from the integers mod <em>p</em>. Then the value <em>y</em> = <em>g</em><em><sup>x</sup></em> mod <em>p</em> is computed. The private signing key is set to <em>x</em>, and the public key is <em>y</em>. The signing key must be kept secret, as this is what allows signatures to be made.</p>
+<p>The signing algorithm produces a signature from a message, <em>m</em>, and the secret key, <em>x</em>. First, a random element of the group, <em>k</em>, is generated. This is known as the <em>nonce</em>, which is important when talking about attacks. Then, the values <em>r</em> = <em>g</em><em><sup>k</sup></em> mod <em>p</em> and <em>s</em> = (<em>k</em><sup>-1</sup>(<em>H</em>(<em>m</em>) + <em>xr</em>)) mod <em>p</em> are computed. Here <em>k</em><sup>-1</sup> is the group inverse, and <em>H</em>(<em>m</em>) is the result of computing the hash of <em>m</em> and interpreting the result as an integer mod <em>p</em>. The signature is defined to be the pair (<em>r</em>,<em>s</em>). (Note: if either of the <em>r</em> or <em>s</em> values equal 0, the algorithm restarts with a new <em>k</em> value).</p>
+<p>The verification algorithm receives as input the signature, (<em>r</em>,<em>s</em>), the message, <em>m</em>, and the public key, <em>y</em>. Let <em>ŝ</em> = <em>s</em><sup>-1</sup>, then the algorithm outputs true if and only if <em>r</em>,<em>s</em> ≠ 0 and <em>r</em> = (<em>g</em><em><sup>H</sup></em><sup>(</sup><em><sup>m</sup></em><sup>)</sup><em>y</em><em><sup>r</sup></em>)<em><sup>ŝ</sup></em>. This verification check works because <em>g</em><em><sup>H</sup></em><sup>(</sup><em><sup>m</sup></em><sup>)</sup><em>y</em><em><sup>r</sup></em> = g<em><sup>H</sup></em><sup>(</sup><em><sup>m</sup></em><sup>)+</sup><em><sup>xr</sup></em> = <em>g</em><em><sup>ks</sup></em>, and so (<em>g</em><em><sup>H</sup></em><sup>(</sup><em><sup>m</sup></em><sup>)</sup><em>y</em><em><sup>r</sup></em>)<em><sup>ŝ</sup></em> = <em>g</em><em><sup>k</sup></em> = <em>r</em>.</p>
+<p>A digital signature scheme is considered secure if it is <em>unforgeable</em>. Unforgeability has a formal cryptographic meaning, but on a high level it means that you cannot produce signatures without knowing the secret key (unless you have copied an already existing signature created from the secret key). DSA is proven to be unforgeable under the <a href="https://en.wikipedia.org/wiki/Discrete_logarithm">discrete log assumption</a>.</p>
+<h2>ECDSA</h2>
+<p>DSA is defined over a mathematical group. When DSA is used with the elliptic curve group as this mathematical group, we call this ECDSA. The elliptic curve group consists of elliptic curve points, which are pairs (<em>x</em>,<em>y</em>) that satisfy the equation <em>y</em><sup>2</sup> = <em>x</em><sup>3</sup> + <em>ax</em> + <em>b</em>, for some <em>a</em>,<em>b</em>. For this blog post, all you need to know is that, using elliptic curves, you can define a finite group, which means you obtain a group generator, <em>g </em>(an elliptic curve point), and addition and scalar multiplication operations just like you can with integers. Since they form a finite group, the generator, <em>g</em>, will have a finite order, <em>p</em>. This blog post will not explain or require you to know how these elliptic curve operations work, but If you’re curious, I encourage you to read more about them <a href="https://andrea.corbellini.name/2015/05/17/elliptic-curve-cryptography-a-gentle-introduction/">here</a>.</p>
+<p>ECDSA works the same way as DSA, except with a different group. The secret key, <em>x</em>, will still be a random value from the integers mod <em>p</em>. Now, the public key, <em>y</em>, is still computed as <em>y</em> = <em>g</em><em><sup>x</sup></em>, except now <em>g</em> is an elliptic curve point. This means that <em>y</em> will also be an elliptic curve point (before, <em>y</em> was an integer mod <em>p</em>). Another difference occurs in how we compute the value <em>r</em>. We still generate a random nonce, <em>k</em>, as an integer mod <em>p</em>, just as before. We will compute <em>g</em><em><sup>k</sup></em>, but again, <em>g</em> is an elliptic curve point, and so <em>g</em><em><sup>k</sup></em> is as well. Therefore, we can compute (<em>x</em><em><sub>k</sub></em>,<em>y</em><em><sub>k</sub></em>) = <em>g</em><em><sup>k</sup></em>, and we set <em>r</em> = <em>x</em><em><sub>k</sub></em>. Now, the <em>s</em> value can be computed as before, and we obtain our signature (<em>r</em>,<em>s</em>), which will still be integers mod <em>p</em> as before. To verify, we need to adjust for the fact that we’ve computed <em>r</em> slightly differently. So, as before, we compute the value (<em>g</em><em><sup>H</sup></em><sup>(</sup><em><sup>m</sup></em><sup>)</sup><em>y</em><em><sup>r</sup></em>)<em><sup>ŝ</sup></em>, but now this value is an elliptic curve point, so we take the x-coordinate of this point and compare it against our <em>r</em> value.</p>
+<h2>Recovering secret keys from reused nonces</h2>
+<p>Now that we understand what ECDSA is and how it works, let’s demonstrate its fragility. Again, since it’s a digital signature scheme, it is imperative that the secret key is never revealed to anyone other than the message signer. However, if a signer ever releases a signature and also releases the nonce they used, an attacker can immediately recover the secret key. Say I release a signature (<em>r</em>,<em>s</em>) for a message <em>m</em>, and I accidentally reveal that I used the nonce <em>k</em>. Since <em>s</em> = (<em>k</em><sup>-1</sup>(<em>H</em>(<em>m</em>) + <em>xr</em>)), we can easily compute the secret key:</p>
+<p>s = (<em>k</em><sup>-1</sup>(<em>H</em>(<em>m</em>) + <em>xr</em>))</p>
+<p><em>ks</em> = <em>H(m)</em> + <em>xr</em></p>
+<p><em>ks</em> &#8211; <em>H(m)</em> = <em>xr</em></p>
+<p><em>x</em> = <em>r</em><sup>-1</sup>(<em>ks</em> &#8211; <em>H</em>(<em>m</em>))</p>
+<p>Therefore, not only does a signer need to keep their secret key secret, but they also must keep <strong>all</strong> of their nonces they <strong>ever</strong> generate secret.</p>
+<p>Even if the signer keeps <strong>every</strong> nonce secret, if they accidentally repeat a <strong>single nonce</strong> (even for different messages), the secret key can immediately be recovered as well. Let (<em>r</em>,<em>s</em><sub>1</sub>) and (<em>r</em>,<em>s</em><sub>2</sub>) be two signatures produced on messages <em>m</em><sub>1</sub> and <em>m</em><sub>2</sub> (respectively) from the same nonce, <em>k</em>—since they have the same nonce, the <em>r</em> values will be the same, so this is very easily detected by an attacker:</p>
+<p><em>s</em><sub>1</sub> = <em>k</em><sup>-1</sup>(<em>H</em>(<em>m</em><sub>1</sub>) + <em>xr</em>) and <em>s</em><sub>2</sub> = <em>k</em><sup>-1</sup>(<em>H</em>(<em>m</em><sub>2</sub>) + <em>xr</em>)</p>
+<p><em>s</em><sub>1</sub> &#8211; <em>s</em><sub>2</sub> = <em>k</em><sup>-1</sup>(<em>H</em>(<em>m</em><sub>1</sub>) &#8211; <em>H</em>(<em>m</em><sub>2</sub>))</p>
+<p><em>k(s</em><sub>1</sub> &#8211; <em>s</em><sub>2</sub>) = <em>H</em>(<em>m</em><sub>1</sub>) &#8211; <em>H</em>(<em>m</em><sub>2</sub>)</p>
+<p><em>k</em> = (<em>s</em><sub>1</sub> &#8211; <em>s</em><sub>2</sub>)<sup>-1</sup>(<em>H</em>(<em>m</em><sub>1</sub>) &#8211; <em>H</em>(<em>m</em><sub>2</sub>))</p>
+<p>Once we have recovered the nonce, <em>k</em>, using the formula above, we can then recover the secret key by performing the previously described attack.</p>
+<p>Let’s take a moment to digest this.</p>
+<p>If a nonce for a signature is ever revealed, the secret key can immediately be recovered, which breaks our entire signature scheme. Further, if two nonces are ever repeated, regardless of what the messages are, an attacker can easily detect this and immediately recover the secret key, again breaking our entire scheme. That is pretty fragile, and these are just the easy attacks!</p>
+<h2>Attacking ECDSA from leaked and biased nonces</h2>
+<p>It turns out that even leaking small parts of the nonce can also be very damaging to the signature scheme. In 1999, <a href="https://www.hpl.hp.com/techreports/1999/HPL-1999-90.pdf">work by Howgrave-Graham and Smart</a> demonstrated the feasibility of using lattice attacks to break DSA from partial nonce leakage. Later, <a href="http://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=99820DCB0DCFAEF58648F81501CF7E79?doi=10.1.1.35.1538&amp;rep=rep1&amp;type=pdf">Nguyen and Shparlinski</a> improved on their work, and were able to recover secret keys on 160-bit DSA (here 160-bit refers to <em>p</em>), and later ECDSA, by knowing only three bits of each nonce from 100 signatures.</p>
+<p>Later, <a href="https://eprint.iacr.org/2013/346.pdf">Mulder et al</a> were able to perform more attacks on partial nonce leakage. They used a different, Fourier transform-based attack derived from work by Bleichenbacher. Using these techniques, and knowing only five bits of each nonce from 4,000 signatures, they were able to recover secret keys from 384-bit ECDSA, and leveraged their techniques to break 384-bit ECDSA running on a smart card.</p>
+<p>You may have heard of the <a href="https://minerva.crocs.fi.muni.cz/">Minerva attack</a>: Several timing side channels were leveraged to recover partial nonce leakage, and these lattice attacks were performed on a wide variety of targets. With enough signatures, they were able to successfully attack targets even when only the size of the nonce was leaked!</p>
+<p>Even worse, a few weeks back, the <a href="https://eprint.iacr.org/2020/615.pdf">LadderLeak attack</a> further improved on Fourier analysis attacks, and now ECDSA secret keys can be recovered if only 1 bit of the nonce is leaked! In fact, the single bit can be leaked with probability less than 1, so attackers technically need less than 1 bit. This was leveraged to attack a very small leakage in <a href="https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication#Montgomery_ladder">Montgomery ladders</a> in several OpenSSL versions.</p>
+<p>Again, let’s digest this. Even when only a few bits of the nonce are leaked—or further, even if only the size of the nonce is leaked—or further, if one bit of nonce is leaked—then, most of the time, the entire signature scheme can be broken by observing enough signatures. This is incredibly fragile!</p>
+<p>On top of this, even if you manage to keep all of your nonces secret and never repeat a nonce, <em>and</em> you never leak any bits of your nonce to an attacker, you still aren’t fully protected! <a href="https://eprint.iacr.org/2019/023.pdf">Work by Breitner and Heninger</a> showed that a slightly faulty random number generator (RNG) can also catastrophically break your scheme by leveraging lattice attacks. Specifically, when using 256-bit ECDSA, if your RNG introduces a bias of just 4 bits in your nonce, your signature scheme can be broken completely by a lattice attack, even if we don’t know what those biased values are.</p>
+<p>These attacks involve some complicated math. Like most cryptographic attacks, they formulate a series of ECDSA signatures as another hard math problem. In this case, the problem is known as the <a href="https://www.iacr.org/archive/crypto2009/56770333/56770333.pdf">Hidden Number Problem</a>. The Hidden Number Problem has been fairly widely studied by other researchers, so there are a lot of techniques and algorithms for solving it. This means that once we figure out how to mold a series of ECDSA signatures into an instance of the Hidden Number Problem, we can then apply existing techniques to find an ECDSA secret key.</p>
+<h2>Breaking ECDSA from bad nonces</h2>
+<p>Now, Fourier analysis, Hidden Number Problems, and lattice attacks are more complicated than your everyday cryptography, and they seem daunting. However, the fact that these attacks involve complicated math may fool some people into thinking they’re very difficult to implement in practice. This is not the case. As I mentioned in the beginning, I will teach you how to implement these attacks using fewer than 100 lines of Python code. Moreover, to perform this attack, you actually don’t need to know anything about the Hidden Number Problem or lattices. The only lattice component we need is access to the <a href="https://en.wikipedia.org/wiki/Lenstra%E2%80%93Lenstra%E2%80%93Lov%C3%A1sz_lattice_basis_reduction_algorithm#Example">LLL algorithm</a>. However, we can treat this algorithm as a black box; we don’t need to understand how it works or what it is doing.</p>
+<p>We’ll be attacking signatures produced from bad nonces (i.e., bad RNG). Specifically, these nonces will have a fixed prefix, meaning their most significant bits are always the same. (The attack still works even if the fixed bits aren’t the most significant bits, but this is the easiest to follow). When using LLL, all we have to know is that we will input a matrix of values, and the algorithm will output a matrix of new values. If we use a series of ECDSA signatures to construct a matrix in a particular way, LLL will output a matrix that will allow us to recover the ECDSA private key. More specifically, because of the way we construct this matrix, one of the rows of the output of LLL will contain all of the signatures’ nonces. (It requires more complicated math to understand why, so we won’t discuss it here, but if you’re curious, see <a href="https://eprint.iacr.org/2019/023.pdf">section 4 of this paper</a>). Once we recover the nonces, we can use the basic attack described above to recover the secret key.</p>
+<p>To perform the attack we’ll need access to an ECDSA and an LLL library in python. I chose <a href="https://github.com/warner/python-ecdsa">this ECDSA library</a>, which allows us to input our own nonces (so we can input nonces from bad RNGs to test our attack), and <a href="https://github.com/orisano/olll">this LLL library</a>. We’ll perform this attack on the NIST P-256 elliptic curve, beginning with the easiest form of the attack: We are given two signatures generated from only 128-bit nonces. First, we generate our signatures.</p>
+<pre class="brush: python; title: ; notranslate" title="">
+import ecdsa
+import random
+
+gen = ecdsa.NIST256p.generator
+order = gen.order()
+secret = random.randrange(1,order)
+
+pub_key = ecdsa.ecdsa.Public_key(gen, gen * secret)
+priv_key = ecdsa.ecdsa.Private_key(pub_key, secret)
+
+nonce1 = random.randrange(1, 2**127)
+nonce2 = random.randrange(1, 2**127)
+
+msg1 = random.randrange(1, order)
+msg2 = random.randrange(1, order)
+
+sig1 = priv_key.sign(msg1, nonce1)
+sig2 = priv_key.sign(msg2, nonce2)
+</pre>
+<p>Now that we have our signatures, we need to craft the matrix we’ll input into the LLL algorithm:</p>
+<div>
+<figure class="aligncenter">
+<p><div id="attachment_100002" style="width: 438px" class="wp-caption aligncenter"><a href="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-2.32.39-pm.png?ssl=1"><img aria-describedby="caption-attachment-100002" data-attachment-id="100002" data-permalink="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/screen-shot-2020-04-25-at-2-32-39-pm/" data-orig-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-2.32.39-pm.png?fit=428%2C322&amp;ssl=1" data-orig-size="428,322" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Screen Shot 2020-04-25 at 2.32.39 PM" data-image-description data-image-caption data-medium-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-2.32.39-pm.png?fit=300%2C226&amp;ssl=1" data-large-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-2.32.39-pm.png?fit=428%2C322&amp;ssl=1" decoding="async" class="wp-image-100002 size-full jetpack-lazy-image" style="border:1px solid #000000;" src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-2.32.39-pm.png?resize=428%2C322&#038;ssl=1" alt width="428" height="322" data-recalc-dims="1" data-lazy-src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-2.32.39-pm.png?resize=428%2C322&amp;is-pending-load=1#038;ssl=1" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><noscript><img data-lazy-fallback="1" aria-describedby="caption-attachment-100002" data-attachment-id="100002" data-permalink="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/screen-shot-2020-04-25-at-2-32-39-pm/" data-orig-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-2.32.39-pm.png?fit=428%2C322&amp;ssl=1" data-orig-size="428,322" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Screen Shot 2020-04-25 at 2.32.39 PM" data-image-description="" data-image-caption="" data-medium-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-2.32.39-pm.png?fit=300%2C226&amp;ssl=1" data-large-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-2.32.39-pm.png?fit=428%2C322&amp;ssl=1" decoding="async" loading="lazy" class="wp-image-100002 size-full" style="border:1px solid #000000;" src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-2.32.39-pm.png?resize=428%2C322&#038;ssl=1" alt="" width="428" height="322" data-recalc-dims="1"  /></noscript></a><p id="caption-attachment-100002" class="wp-caption-text">Matrix that we will input into the LLL algorithm</p></div></figure>
+</div>
+<p>Here N is the order of NIST P-256 (ord in code snippet above), B is the upper bound on the size of our nonces (which will be 2<sup>128</sup> in this example, because both nonces are only 128 bits in size); m<sub>1</sub> and m<sub>2</sub> are the two random messages; and (r<sub>1</sub>, s<sub>1</sub>) and (r<sub>2</sub>,s<sub>2</sub>) are the two signature pairs. In our python code, our matrix will look like this (here modular_inv is a function for computing the inverse mod N):</p>
+<pre class="brush: python; title: ; notranslate" title="">
+r1 = sig1.r
+s1_inv = modular_inv(sig1.s, order)
+r2 = sig2.r
+s2_inv = modular_inv(sig2.s, order)
+
+matrix = [[order, 0, 0, 0], [0, order, 0, 0],
+[r1*s1_inv, r2*s2_inv, (2**128) / order, 0],
+[msg1*s1_inv, msg2*s2_inv, 0, 2**128]]
+</pre>
+<p>Now we’ll input this matrix into the black-box LLL algorithm, which will return a new matrix to us. For reasons that don’t matter here, one of the rows of this returned matrix will contain the nonces used to generate the two signatures. If we knew more about what the algorithm is actually doing, we could probably predict where the nonce is going to be. But since we don’t care about the details, we are just going to check every row in the returned matrix to see if we can find the secret key. Remember, we already showed how to recover the private key once we have the nonce, <em>k</em>. Specifically, we compute <em>r</em><sup>-1</sup>(<em>ks</em> &#8211; <em>H</em>(<em>m</em>)). An attacker in the real world would have access to the public key corresponding to these signatures. Therefore, to determine if we have found the correct private key, we will compute its corresponding public key and compare it against the known public key. The attack will look like this:</p>
+<pre class="brush: python; title: ; notranslate" title="">
+import olll
+
+new_matrix = olll.reduction(matrix, 0.75)
+r1_inv = modular_inv(sig1.r, order)
+s1 = sig1.s
+
+for row in new_matrix:
+    potential_nonce_1 = row[0]
+    potential_priv_key = r1_inv * ((potential_nonce_1 * s1) - msg1)
+
+    # check if we found private key by comparing its public key with actual public key
+    if ecdsa.ecdsa.Public_key(gen, gen * potential_priv_key) == pub_key:
+        print(&amp;quot;found private key!&amp;quot;)
+</pre>
+<p>I should mention that there is a noticeable failure rate for this basic attack. If you run the code presented to you, you will notice this as well. But again, for the purposes of this post, don’t worry about these specifics. Also, this failure rate should decrease if you perform this same attack with more signatures.</p>
+<p>Hopefully at this point I’ve shown why these attacks aren’t so complicated. We were able to recover the secret key from just two signatures, and we didn’t do anything overly complicated. That said, some of you would probably argue that being able to attack signatures with only 128-bit nonces isn’t that interesting. So let’s move on to more realistic attacks.</p>
+<h2>Exploiting real-world ECDSA bugs</h2>
+<p>You may have heard of a <a href="https://www.yubico.com/support/security-advisories/ysa-2019-02/#technical-details">recent bug in the randomness generated in Yubikeys</a>. Essentially, bad randomness caused as many as 80 bits of the nonce to be fixed to the same value. Attacking this real-world bug will not be much more difficult than the attack we just performed above, except we don’t know what the fixed 80-bit values are (in the previous example, we knew the fixed 128 bits were all set to 0). To overcome this, we need to add a trick to our attack.</p>
+<p>Imagine we receive a collection of signatures whose nonces have 80 fixed bits. For ease of explanation, we will assume these 80 bits are the most significant bits (the attack is still feasible if this is not the case; you simply shift the fixed bits to the most significant bits by multiplying each signature by a power of 2). Even though we don’t know what these 80 bits are, we know that if we subtract any two nonces, the 80 most significant bits of their difference will all be zeros. Therefore, we are going to perform the same attack as above, except with our signature values subtracted. Specifically, given a set of <em>n</em> signatures and messages, we will build the following matrix:</p>
+<div>
+<figure class="aligncenter">
+<p><div id="attachment_100003" style="width: 700px" class="wp-caption aligncenter"><a href="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-7.22.01-pm.png?ssl=1"><img aria-describedby="caption-attachment-100003" data-attachment-id="100003" data-permalink="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/screen-shot-2020-04-25-at-7-22-01-pm/" data-orig-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-7.22.01-pm.png?fit=762%2C384&amp;ssl=1" data-orig-size="762,384" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Screen Shot 2020-04-25 at 7.22.01 PM" data-image-description data-image-caption data-medium-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-7.22.01-pm.png?fit=300%2C151&amp;ssl=1" data-large-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-7.22.01-pm.png?fit=690%2C348&amp;ssl=1" decoding="async" class="wp-image-100003 size-large jetpack-lazy-image" style="border:1px solid #000000;" src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-7.22.01-pm.png?resize=690%2C348&#038;ssl=1" alt width="690" height="348" data-recalc-dims="1" data-lazy-src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-7.22.01-pm.png?resize=690%2C348&amp;is-pending-load=1#038;ssl=1" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><noscript><img data-lazy-fallback="1" aria-describedby="caption-attachment-100003" data-attachment-id="100003" data-permalink="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/screen-shot-2020-04-25-at-7-22-01-pm/" data-orig-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-7.22.01-pm.png?fit=762%2C384&amp;ssl=1" data-orig-size="762,384" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Screen Shot 2020-04-25 at 7.22.01 PM" data-image-description="" data-image-caption="" data-medium-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-7.22.01-pm.png?fit=300%2C151&amp;ssl=1" data-large-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-7.22.01-pm.png?fit=690%2C348&amp;ssl=1" decoding="async" loading="lazy" class="wp-image-100003 size-large" style="border:1px solid #000000;" src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-25-at-7.22.01-pm.png?resize=690%2C348&#038;ssl=1" alt="" width="690" height="348" data-recalc-dims="1"  /></noscript></a><p id="caption-attachment-100003" class="wp-caption-text">Matrix that we will input into the LLL algorithm when the nonce bias is unknown</p></div></figure>
+</div>
+<p>This time, we will again input this matrix into LLL and receive a new matrix back. However, since we subtracted the <em>n</em><sup>th</sup> value from every entry in this matrix, instead of receiving a row full of nonces, we will actually receive a row with the difference between each nonce and the <em>n</em><sup>th</sup> nonce. In other words, the matrix returned from LLL will give us the value <em>k</em><em><sub>1</sub></em><em> &#8211; k</em><em><sub>n</sub></em>, the difference between the nonces for signatures 1 and <em>n</em>. It takes some algebraic manipulation, but we can still recover the secret key from this value using the following formula:</p>
+<p><em>s</em><sub>1</sub> = <em>k<sub>1</sub></em><sup>-1</sup>(<em>m</em><sub>1</sub> + <em>xr<sub>1</sub></em>) and <em>s</em><sub>n</sub> = <em>k<sub>n</sub></em><sup>-1</sup>(<em>m</em><sub>n</sub> + <em>xr<sub>n</sub></em>)</p>
+<p><em>s</em><sub>1</sub><em>k</em><sub>1</sub> = <em>m</em><sub>1</sub> + <em>xr<sub>1</sub></em> and <em>s</em><sub>n</sub><em>k<sub>n</sub></em> = <em>m</em><sub>n</sub> + <em>xr<sub>n</sub></em></p>
+<p><em> k</em><sub>1</sub> = <em>s<sub>1</sub></em><sup>-1</sup>(<em>m</em><sub>1</sub> + <em>xr<sub>1</sub></em>) and <em>k</em><sub>n</sub> = <em>s<sub>n</sub></em><sup>-1</sup>(<em>m</em><sub>n</sub> + <em>xr<sub>n</sub></em>)</p>
+<p><em>k</em><sub>1</sub> &#8211; <em>k</em><sub>n</sub> = <em>s</em><sub>1</sub><sup>-1</sup>(<em>m</em><sub>1</sub> + <em>xr<sub>1</sub></em>) &#8211; <em>s<sub>n</sub></em><sup>-1</sup>(<em>m</em><sub>n</sub> + <em>xr<sub>n</sub></em>)</p>
+<p><em>s</em><sub>1</sub><em>s<sub>n</sub>(k</em><sub>1</sub> &#8211; <em>k</em><sub>n</sub>) = <em>s</em><sub>n</sub>(<em>m</em><sub>1</sub> + <em>xr<sub>1</sub></em>) &#8211; <em>s</em><sub>1</sub>(<em>m</em><sub>n</sub> + <em>xr<sub>n</sub></em>)</p>
+<p><em>s</em><sub>1</sub><em>s<sub>n</sub>(k</em><sub>1</sub> &#8211; <em>k</em><sub>n</sub>) = <em>xs<sub>n</sub>r</em><sub>1</sub><em> &#8211; xs</em><sub>1</sub><em>r<sub>n</sub> + s<sub>n</sub>m</em><sub>1</sub><em> &#8211; s</em><sub>1</sub><em>m<sub>n</sub></em></p>
+<p><em>x</em>(<em>s</em><sub>1</sub><em>r</em><sub>n</sub><em> &#8211; s</em><sub>n</sub><em>r</em><sub>1</sub>) =<em> s<sub>n</sub>m</em><sub>1</sub><em> &#8211; s</em><sub>1</sub><em>m<sub>n</sub></em> &#8211; <em><sub> </sub>s</em><sub>1</sub><em>s<sub>n</sub>(k</em><sub>1</sub> &#8211; <em>k</em><sub>n</sub>)</p>
+<p>Secret key = x = (r<sub>n</sub>s<sub>1</sub> &#8211; r<sub>1</sub>s<sub>n</sub>)<sup>-1</sup> (s<sub>n</sub>m<sub>1</sub> &#8211; s<sub>1</sub>m<sub>n</sub> &#8211; s<sub>1</sub>s<sub>n</sub>(k<sub>1</sub> &#8211; k<sub>n</sub>))</p>
+<p>With all of that context, let’s exploit the Yubikey bug. If signatures are produced from nonces with 80 fixed bits, we only need five signatures to recover the secret key. We will build the matrix above with <em>n</em> = 6 to reduce the error rate:</p>
+<pre class="brush: python; title: ; notranslate" title="">
+# generate 80 most significant bits, nonce must be less than order
+yubikey_fixed_prefix = random.randrange(2**176, order)
+
+msgs = [random.randrange(1, order) for i in range(6)]
+nonces = [random.randrange(1, 2**176) + yubikey_fixed_prefix for i in range(6)]
+sigs = [priv_key.sign(msgs[i],nonces[i]) for i in range(6)]
+
+matrix = [[order, 0, 0, 0, 0, 0, 0],
+[0, order, 0, 0, 0, 0, 0],
+[0, 0, order, 0, 0, 0, 0],
+[0, 0, 0, order, 0, 0, 0],
+[0, 0, 0, 0, order, 0, 0]]
+
+row, row2 = [], []
+[msgn, rn, sn] = [msgs[-1], sigs[-1].r, sigs[-1].s]
+rnsn_inv = rn * modular_inv(sn, order)
+mnsn_inv = msgn * modular_inv(sn, order)
+
+# 2nd to last row: [r1(s1^-1) - rn(sn^-1), ... , rn-1(sn-1^-1) - rn(sn^-1), 2^176/order, 0 ]
+# last row: [m1(s1^-1) - mn(sn^-1), ... , mn-1(sn-1^-1) - mn(sn^-1), 0, 2^176]
+for i in range(5):
+    row.append((sigs[i].r * modular_inv(sigs[i].s, order)) - rnsn_inv)
+    row2.append((msgs[i] * modular_inv(sigs[i].s, order)) - mnsn_inv)
+
+# add last elements of last two rows, B = 2**(256-80) for yubikey
+row.append((2**176) / order)
+row.append(0)
+row2.append(0)
+row2.append(2**176)
+
+matrix.append(row)
+matrix.append(row2)
+
+new_matrix = olll.reduction(matrix, 0.75)
+
+for row in new_matrix:
+    potential_nonce_diff = row[0]
+
+    # Secret key = (rns1 - r1sn)-1 (snm1 - s1mn - s1sn(k1 - kn))
+    potential_priv_key = (sn * msgs[0]) - (sigs[0].s * msgn) - (sigs[0].s * sn * potential_nonce_diff)
+    potential_priv_key *= modular_inv((rn * sigs[0].s) - (sigs[0].r * sn), order)
+
+    # check if we found private key by comparing its public key with actual public key
+    if ecdsa.ecdsa.Public_key(gen, gen * potential_priv_key) == pub_key:
+        print(&amp;quot;found private key!&amp;quot;)
+</pre>
+<p>That’s it! We just exploited a real-world bug in about 50 lines of python.</p>
+<p>Some might further argue that although this was an actual bug, systems producing 80 fixed bits are rare. However, this attack can be much more powerful than shown in this one example! For 256-bit elliptic curves, this attack will work even if only 4 bits of the nonce are fixed. Moreover, the attack does not become more complicated to implement. You simply need to increase the dimension of your lattice—i.e., in the matrix figure above, just increase the value of <em>n</em> and repeat the attack—nothing else! This will increase the running time of your attack, but not the complexity to implement. You could copy that code snippet and recover ECDSA secret keys generated from nonces with as little as 4 bits of bias. On top of that, the attack against nonce leakage is a similar level of difficulty.</p>
+<p>Hopefully, I’ve now convinced you of the fragility of ECDSA and how easily it can be broken in practice when things go wrong.</p>
+<p>By the way, some of you may be wondering how we determine the value <em>n</em>. Remember, <em>n</em> is the number of signatures we need to recover the secret key. When the nonce had the first 128 bits fixed to 0, this value was 2 (this value is 3 when 128 bits are fixed, but we don’t know to what value they are fixed). When the nonce had 80 randomly fixed bits, this value was 5. If you consult the relevant publications around these attacks, you can find the exact formula and derivation of this value for a given number of fixed bits. For simplicity, I derived these values empirically by attempting this attack with different numbers of signatures on different amounts of fixed bits. I’ve compiled the results into the figure below:</p>
+<div>
+<figure class="aligncenter">
+<p><div id="attachment_100005" style="width: 700px" class="wp-caption aligncenter"><a href="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-27-at-9.44.49-pm.png?ssl=1"><img aria-describedby="caption-attachment-100005" data-attachment-id="100005" data-permalink="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/screen-shot-2020-04-27-at-9-44-49-pm/" data-orig-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-27-at-9.44.49-pm.png?fit=1600%2C695&amp;ssl=1" data-orig-size="1600,695" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Screen Shot 2020-04-27 at 9.44.49 PM" data-image-description data-image-caption data-medium-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-27-at-9.44.49-pm.png?fit=300%2C130&amp;ssl=1" data-large-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-27-at-9.44.49-pm.png?fit=690%2C300&amp;ssl=1" decoding="async" class="wp-image-100005 size-large jetpack-lazy-image" style="border:1px solid #000000;" src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-27-at-9.44.49-pm.png?resize=690%2C300&#038;ssl=1" alt width="690" height="300" data-recalc-dims="1" data-lazy-src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-27-at-9.44.49-pm.png?resize=690%2C300&amp;is-pending-load=1#038;ssl=1" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><noscript><img data-lazy-fallback="1" aria-describedby="caption-attachment-100005" data-attachment-id="100005" data-permalink="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/screen-shot-2020-04-27-at-9-44-49-pm/" data-orig-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-27-at-9.44.49-pm.png?fit=1600%2C695&amp;ssl=1" data-orig-size="1600,695" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Screen Shot 2020-04-27 at 9.44.49 PM" data-image-description="" data-image-caption="" data-medium-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-27-at-9.44.49-pm.png?fit=300%2C130&amp;ssl=1" data-large-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-27-at-9.44.49-pm.png?fit=690%2C300&amp;ssl=1" decoding="async" loading="lazy" class="wp-image-100005 size-large" style="border:1px solid #000000;" src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/screen-shot-2020-04-27-at-9.44.49-pm.png?resize=690%2C300&#038;ssl=1" alt="" width="690" height="300" data-recalc-dims="1"  /></noscript></a><p id="caption-attachment-100005" class="wp-caption-text">The number of signatures required to use this attack for a given number of fixed nonce bits (derived empirically)</p></div></figure>
+</div>
+<h2>Protecting your ECDSA signatures</h2>
+<p>If ECDSA is so fragile, how can users protect themselves? Ideally, we recommend that you use <a href="https://en.wikipedia.org/wiki/EdDSA">EdDSA</a> instead of ECDSA, which handles nonce generation much more safely by eliminating the use of RNGs. Further, Ed25519, which is EdDSA over <a href="https://en.wikipedia.org/wiki/Curve25519">Curve25519</a>, is designed to overcome the side-channel attacks that have targeted ECDSA, and it is currently being <a href="https://csrc.nist.gov/publications/detail/fips/186/5/draft">standardized by NIST</a>.</p>
+<p>If you’re required to use ECDSA, proceed with caution and handle with care! ECDSA is fragile, but it is not broken. As we saw, it is imperative that nonces used for ECDSA signatures are never repeated, never revealed (even partially), and generated safely.</p>
+<p>To protect yourself from nonce leakage, the mitigation strategy is to write the implementation to operate in “constant time.” However, guaranteeing this can be very difficult, <a href="https://eprint.iacr.org/2020/615.pdf">as we saw with OpenSSL</a>. For instance, code can appear to be constant time, but then an optimizing compiler can introduce non-constant time behavior. Further, some assembly instructions are constant time in some architectures or processor models, but not in others. (Read more about this <a href="https://www.chosenplaintext.ca/articles/beginners-guide-constant-time-cryptography.html">here</a>).</p>
+<p>Another technique for mitigating nonce leakage is known as <a href="https://eprint.iacr.org/2015/801.pdf">blinding</a>, where random numbers are included in your arithmetic to randomize timing information. However, evaluating the security of your blinding implementation can be tricky, and slightly weak blinding schemes can be problematic.</p>
+<p>With both of these mitigations, keep in mind that the amount of nonce leakage is on the order of a single bit, so even the slightest changes by an optimizing compiler or the slightest leakage from your blinding technique can be catastrophic to your signature scheme.</p>
+<p>To ensure that nonces are generated safely, most people recommend using <a href="https://tools.ietf.org/html/rfc6979">RFC 6979</a>, which specifies a way to securely generate nonces deterministically (i.e., without an RNG), using the message and secret key as entropy. This protocol to generate nonces eliminates the problem of bad RNGs, which can be problematic for devices such as Yubikeys where generating randomness securely is difficult. The signature scheme EdDSA actually uses a similar nonce generation method by default to avoid bad RNGs.</p>
+<p>If you are using ECDSA in your system, I encourage you to consider all of those recommendations. Hopefully, with enough care, your signature scheme won’t end up like this:</p>
+<div>
+<figure class="aligncenter">
+<p><div id="attachment_100006" style="width: 589px" class="wp-caption aligncenter"><a href="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/pasted-image-0.png?ssl=1"><img aria-describedby="caption-attachment-100006" data-attachment-id="100006" data-permalink="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/pasted-image-0-4/" data-orig-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/pasted-image-0.png?fit=579%2C380&amp;ssl=1" data-orig-size="579,380" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="pasted image 0" data-image-description data-image-caption data-medium-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/pasted-image-0.png?fit=300%2C197&amp;ssl=1" data-large-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/pasted-image-0.png?fit=579%2C380&amp;ssl=1" decoding="async" class="wp-image-100006 size-full jetpack-lazy-image" style="border:1px solid #000000;" src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/pasted-image-0.png?resize=579%2C380&#038;ssl=1" alt width="579" height="380" data-recalc-dims="1" data-lazy-src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/pasted-image-0.png?resize=579%2C380&amp;is-pending-load=1#038;ssl=1" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><noscript><img data-lazy-fallback="1" aria-describedby="caption-attachment-100006" data-attachment-id="100006" data-permalink="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/pasted-image-0-4/" data-orig-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/pasted-image-0.png?fit=579%2C380&amp;ssl=1" data-orig-size="579,380" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="pasted image 0" data-image-description="" data-image-caption="" data-medium-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/pasted-image-0.png?fit=300%2C197&amp;ssl=1" data-large-file="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/pasted-image-0.png?fit=579%2C380&amp;ssl=1" decoding="async" loading="lazy" class="wp-image-100006 size-full" style="border:1px solid #000000;" src="https://i0.wp.com/blog.trailofbits.com/wp-content/uploads/2020/06/pasted-image-0.png?resize=579%2C380&#038;ssl=1" alt="" width="579" height="380" data-recalc-dims="1"  /></noscript></a><p id="caption-attachment-100006" class="wp-caption-text">This is what happens to ECDSA when you don’t generate your nonces safely</p></div></figure>
+</div>
+<p>We’re always experimenting and developing tools to help you work faster and smarter. Need help with your next project? <a href="https://www.trailofbits.com/contact/">Contact us</a>!</p>
+<div class="sharedaddy sd-sharing-enabled"><div class="robots-nocontent sd-block sd-social sd-social-icon-text sd-sharing"><h3 class="sd-title">Share this:</h3><div class="sd-content"><ul><li class="share-twitter"><a rel="nofollow noopener noreferrer" data-shared="sharing-twitter-99991" class="share-twitter sd-button share-icon" href="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/?share=twitter" target="_blank" title="Click to share on Twitter" ><span>Twitter</span></a></li><li class="share-linkedin"><a rel="nofollow noopener noreferrer" data-shared="sharing-linkedin-99991" class="share-linkedin sd-button share-icon" href="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/?share=linkedin" target="_blank" title="Click to share on LinkedIn" ><span>LinkedIn</span></a></li><li class="share-reddit"><a rel="nofollow noopener noreferrer" data-shared="" class="share-reddit sd-button share-icon" href="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/?share=reddit" target="_blank" title="Click to share on Reddit" ><span>Reddit</span></a></li><li class="share-telegram"><a rel="nofollow noopener noreferrer" data-shared="" class="share-telegram sd-button share-icon" href="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/?share=telegram" target="_blank" title="Click to share on Telegram" ><span>Telegram</span></a></li><li class="share-facebook"><a rel="nofollow noopener noreferrer" data-shared="sharing-facebook-99991" class="share-facebook sd-button share-icon" href="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/?share=facebook" target="_blank" title="Click to share on Facebook" ><span>Facebook</span></a></li><li class="share-pocket"><a rel="nofollow noopener noreferrer" data-shared="" class="share-pocket sd-button share-icon" href="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/?share=pocket" target="_blank" title="Click to share on Pocket" ><span>Pocket</span></a></li><li class="share-email"><a rel="nofollow noopener noreferrer" data-shared="" class="share-email sd-button share-icon" href="mailto:?subject=%5BShared%20Post%5D%20ECDSA%3A%20Handle%20with%20Care&body=https%3A%2F%2Fblog.trailofbits.com%2F2020%2F06%2F11%2Fecdsa-handle-with-care%2F&share=email" target="_blank" title="Click to email a link to a friend" data-email-share-error-title="Do you have email set up?" data-email-share-error-text="If you&#039;re having problems sharing via email, you might not have email set up for your browser. You may need to create a new email yourself." data-email-share-nonce="323afe8c33" data-email-share-track-url="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/?share=email"><span>Email</span></a></li><li class="share-print"><a rel="nofollow noopener noreferrer" data-shared="" class="share-print sd-button share-icon" href="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/#print" target="_blank" title="Click to print" ><span>Print</span></a></li><li class="share-end"></li></ul></div></div></div><div class='sharedaddy sd-block sd-like jetpack-likes-widget-wrapper jetpack-likes-widget-unloaded' id='like-post-wrapper-3681601-99991-6432e9791df97' data-src='https://widgets.wp.com/likes/#blog_id=3681601&amp;post_id=99991&amp;origin=blog.trailofbits.com&amp;obj_id=3681601-99991-6432e9791df97' data-name='like-post-frame-3681601-99991-6432e9791df97' data-title='Like or Reblog'><h3 class="sd-title">Like this:</h3><div class='likes-widget-placeholder post-likes-widget-placeholder' style='height: 55px;'><span class='button'><span>Like</span></span> <span class="loading">Loading...</span></div><span class='sd-text-color'></span><a class='sd-link-color'></a></div>			</div><!-- .entry-content -->
+
+	<footer class="entry-footer">
+		<p class="entry-byline">By James Miller</p>
+		<p class="cat-links">Posted in <a href="https://blog.trailofbits.com/category/cryptography/" rel="category tag">Cryptography</a></p>
+			</footer>
+</article><!-- #post-99991 -->
+						<nav role="navigation" id="nav-below" class="site-navigation post-navigation">
+			<h1 class="assistive-text">Post navigation</h1>
+
+		
+			<div class="nav-previous"><a href="https://blog.trailofbits.com/2020/06/09/how-to-check-if-a-mutex-is-locked-in-go/" rel="prev"><span class="meta-nav">&larr;</span> How to check if a mutex is locked in Go</a></div>			<div class="nav-next"><a href="https://blog.trailofbits.com/2020/06/12/upgradeable-contracts-made-safer-with-crytic/" rel="next">Upgradeable contracts made safer with Crytic <span class="meta-nav">&rarr;</span></a></div>
+		
+		</nav><!-- #nav-below -->
+		
+					<div id="comments" class="comments-area">
+	
+	
+			<h2 class="comments-title">
+			3 thoughts on &ldquo;<span>ECDSA: Handle with Care</span>&rdquo;		</h2>
+
+		
+		<ol class="commentlist">
+					<li class="comment even thread-even depth-1" id="li-comment-113299">
+			<article id="comment-113299" class="comment">
+				<footer>
+					<div class="comment-author vcard">
+						<img alt src="https://i0.wp.com/pbs.twimg.com/profile_images/1263255738148950021/Tw-RDDv3_normal.jpg?resize=60%2C60" class="avatar avatar-60 photo jetpack-lazy-image" height="60" width="60" decoding="async" data-lazy-srcset="https://secure.gravatar.com/avatar/6785231e4d7c027aac6a19313c0900c7?s=120&#038;d=identicon&#038;r=g 2x" data-lazy-src="https://i0.wp.com/pbs.twimg.com/profile_images/1263255738148950021/Tw-RDDv3_normal.jpg?resize=60%2C60&amp;is-pending-load=1" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><noscript><img data-lazy-fallback="1" alt='' src='https://i0.wp.com/pbs.twimg.com/profile_images/1263255738148950021/Tw-RDDv3_normal.jpg?resize=60%2C60' srcset='https://secure.gravatar.com/avatar/6785231e4d7c027aac6a19313c0900c7?s=120&#038;d=identicon&#038;r=g 2x' class='avatar avatar-60 photo' height='60' width='60' loading='lazy' decoding='async' /></noscript>						<cite class="comment-author-name fn"><a href="http://twitter.com/SoatokDhole" class="url" rel="ugc external nofollow">soatok@home~$ (@SoatokDhole)</a></cite>
+					</div><!-- .comment-author .vcard -->
+					
+					<div class="comment-meta commentmetadata">
+						<a class="comment-link" href="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/#comment-113299"><time pubdate datetime="2020-06-12T19:28:02-04:00">
+						June 12, 2020 at 7:28 pm						</time></a>
+						<a rel='nofollow' class='comment-reply-link' href='https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/?replytocom=113299#respond' data-commentid="113299" data-postid="99991" data-belowelement="comment-113299" data-respondelement="respond" data-replyto="Reply to soatok@home~$ (@SoatokDhole)" aria-label='Reply to soatok@home~$ (@SoatokDhole)'>Reply</a>											</div><!-- .comment-meta .commentmetadata -->
+				</footer>
+
+				<div class="comment-content"><p>EdDSA is the best we have right now, but it&#8217;s still not ideal in embedded systems (or really anywhere were fault attacks are in scope).</p>
+<p>Fortunately, that&#8217;s easily amended through what the CFRG is calling &#8220;hedged signatures&#8221;: <a href="https://soatok.blog/2020/05/03/hedged-signatures-with-libsodium-using-dhole" rel="nofollow ugc">https://soatok.blog/2020/05/03/hedged-signatures-with-libsodium-using-dhole</a></p>
+<p>I&#8217;m curious where the ball will stop rolling on ECC signature research.</p>
+<div class='jetpack-comment-likes-widget-wrapper jetpack-likes-widget-unloaded' id='like-comment-wrapper-3681601-113299-6432e9791fcd0' data-src='https://widgets.wp.com/likes/#blog_id=3681601&amp;comment_id=113299&amp;origin=blog.trailofbits.com&amp;obj_id=3681601-113299-6432e9791fcd0' data-name='like-comment-frame-3681601-113299-6432e9791fcd0'>
+<div class='likes-widget-placeholder comment-likes-widget-placeholder comment-likes'><span class='loading'>Loading...</span></div>
+<div class='comment-likes-widget jetpack-likes-widget comment-likes'><span class='comment-like-feedback'></span><span class='sd-text-color'></span><a class='sd-link-color'></a></div>
+</div>
+</div>
+
+			</article><!-- #comment-## -->
+
+		</li><!-- #comment-## -->
+		<li class="comment odd alt thread-odd thread-alt depth-1" id="li-comment-114197">
+			<article id="comment-114197" class="comment">
+				<footer>
+					<div class="comment-author vcard">
+						<img alt src="https://secure.gravatar.com/avatar/068e30f19ad285ba33d10c3cab09a432?s=60&#038;d=identicon&#038;r=g" class="avatar avatar-60 photo jetpack-lazy-image" height="60" width="60" decoding="async" data-lazy-srcset="https://secure.gravatar.com/avatar/068e30f19ad285ba33d10c3cab09a432?s=120&#038;d=identicon&#038;r=g 2x" data-lazy-src="https://secure.gravatar.com/avatar/068e30f19ad285ba33d10c3cab09a432?s=60&amp;is-pending-load=1#038;d=identicon&#038;r=g" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><noscript><img data-lazy-fallback="1" alt='' src='https://secure.gravatar.com/avatar/068e30f19ad285ba33d10c3cab09a432?s=60&#038;d=identicon&#038;r=g' srcset='https://secure.gravatar.com/avatar/068e30f19ad285ba33d10c3cab09a432?s=120&#038;d=identicon&#038;r=g 2x' class='avatar avatar-60 photo' height='60' width='60' loading='lazy' decoding='async' /></noscript>						<cite class="comment-author-name fn">Darío</cite>
+					</div><!-- .comment-author .vcard -->
+					
+					<div class="comment-meta commentmetadata">
+						<a class="comment-link" href="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/#comment-114197"><time pubdate datetime="2020-06-16T15:44:56-04:00">
+						June 16, 2020 at 3:44 pm						</time></a>
+						<a rel='nofollow' class='comment-reply-link' href='https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/?replytocom=114197#respond' data-commentid="114197" data-postid="99991" data-belowelement="comment-114197" data-respondelement="respond" data-replyto="Reply to Darío" aria-label='Reply to Darío'>Reply</a>											</div><!-- .comment-meta .commentmetadata -->
+				</footer>
+
+				<div class="comment-content"><p>I was inspired<br />
+<a href="https://github.com/daedalus/BreakingECDSAwithLLL" rel="nofollow ugc">https://github.com/daedalus/BreakingECDSAwithLLL</a></p>
+<div class='jetpack-comment-likes-widget-wrapper jetpack-likes-widget-unloaded' id='like-comment-wrapper-3681601-114197-6432e979200b4' data-src='https://widgets.wp.com/likes/#blog_id=3681601&amp;comment_id=114197&amp;origin=blog.trailofbits.com&amp;obj_id=3681601-114197-6432e979200b4' data-name='like-comment-frame-3681601-114197-6432e979200b4'>
+<div class='likes-widget-placeholder comment-likes-widget-placeholder comment-likes'><span class='loading'>Loading...</span></div>
+<div class='comment-likes-widget jetpack-likes-widget comment-likes'><span class='comment-like-feedback'></span><span class='sd-text-color'></span><a class='sd-link-color'></a></div>
+</div>
+</div>
+
+			</article><!-- #comment-## -->
+
+		<ul class="children">
+		<li class="comment even depth-2" id="li-comment-116492">
+			<article id="comment-116492" class="comment">
+				<footer>
+					<div class="comment-author vcard">
+						<img alt src="https://secure.gravatar.com/avatar/1877ff79ad26a6066fe7c1f729f30ac7?s=60&#038;d=identicon&#038;r=g" class="avatar avatar-60 photo jetpack-lazy-image" height="60" width="60" decoding="async" data-lazy-srcset="https://secure.gravatar.com/avatar/1877ff79ad26a6066fe7c1f729f30ac7?s=120&#038;d=identicon&#038;r=g 2x" data-lazy-src="https://secure.gravatar.com/avatar/1877ff79ad26a6066fe7c1f729f30ac7?s=60&amp;is-pending-load=1#038;d=identicon&#038;r=g" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><noscript><img data-lazy-fallback="1" alt='' src='https://secure.gravatar.com/avatar/1877ff79ad26a6066fe7c1f729f30ac7?s=60&#038;d=identicon&#038;r=g' srcset='https://secure.gravatar.com/avatar/1877ff79ad26a6066fe7c1f729f30ac7?s=120&#038;d=identicon&#038;r=g 2x' class='avatar avatar-60 photo' height='60' width='60' loading='lazy' decoding='async' /></noscript>						<cite class="comment-author-name fn">tam fun</cite>
+					</div><!-- .comment-author .vcard -->
+					
+					<div class="comment-meta commentmetadata">
+						<a class="comment-link" href="https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/#comment-116492"><time pubdate datetime="2021-03-02T20:41:23-05:00">
+						March 2, 2021 at 8:41 pm						</time></a>
+						<a rel='nofollow' class='comment-reply-link' href='https://blog.trailofbits.com/2020/06/11/ecdsa-handle-with-care/?replytocom=116492#respond' data-commentid="116492" data-postid="99991" data-belowelement="comment-116492" data-respondelement="respond" data-replyto="Reply to tam fun" aria-label='Reply to tam fun'>Reply</a>											</div><!-- .comment-meta .commentmetadata -->
+				</footer>
+
+				<div class="comment-content"><p>Hi dario, I see you repo and it&#8217;s quite interesting, could you please add a description of how to use *CSV file and the required structure in it</p>
+<div class='jetpack-comment-likes-widget-wrapper jetpack-likes-widget-unloaded' id='like-comment-wrapper-3681601-116492-6432e97920437' data-src='https://widgets.wp.com/likes/#blog_id=3681601&amp;comment_id=116492&amp;origin=blog.trailofbits.com&amp;obj_id=3681601-116492-6432e97920437' data-name='like-comment-frame-3681601-116492-6432e97920437'>
+<div class='likes-widget-placeholder comment-likes-widget-placeholder comment-likes'><span class='loading'>Loading...</span></div>
+<div class='comment-likes-widget jetpack-likes-widget comment-likes'><span class='comment-like-feedback'></span><span class='sd-text-color'></span><a class='sd-link-color'></a></div>
+</div>
+</div>
+
+			</article><!-- #comment-## -->
+
+		</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+		</ol>
+
+		
+	
+	
+	
+		<div id="respond" class="comment-respond">
+							<h3 id="reply-title" class="comment-reply-title">Leave a Reply					<small><a rel="nofollow" id="cancel-comment-reply-link" href="/2020/06/11/ecdsa-handle-with-care/#respond" style="display:none;">Cancel reply</a></small>
+				</h3>
+						<form id="commentform" class="comment-form">
+				<iframe
+					title="Comment Form"
+					src="https://jetpack.wordpress.com/jetpack-comment/?blogid=3681601&#038;postid=99991&#038;comment_registration=0&#038;require_name_email=1&#038;stc_enabled=1&#038;stb_enabled=1&#038;show_avatars=1&#038;avatar_default=identicon&#038;greeting=Leave+a+Reply&#038;jetpack_comments_nonce=cb0a15f44c&#038;greeting_reply=Leave+a+Reply+to+%25s&#038;color_scheme=light&#038;lang=en_US&#038;jetpack_version=12.1-a.3&#038;show_cookie_consent=10&#038;has_cookie_consent=0&#038;token_key=%3Bnormal%3B&#038;sig=74db882dac5224545d02bfa4c992409c4a936209#parent=https%3A%2F%2Fblog.trailofbits.com%2F2020%2F06%2F11%2Fecdsa-handle-with-care%2F"
+											name="jetpack_remote_comment"
+						style="width:100%; height: 430px; border:0;"
+										class="jetpack_remote_comment"
+					id="jetpack_remote_comment"
+					sandbox="allow-same-origin allow-top-navigation allow-scripts allow-forms allow-popups"
+				>
+									</iframe>
+									<!--[if !IE]><!-->
+					<script>
+						document.addEventListener('DOMContentLoaded', function () {
+							var commentForms = document.getElementsByClassName('jetpack_remote_comment');
+							for (var i = 0; i < commentForms.length; i++) {
+								commentForms[i].allowTransparency = false;
+								commentForms[i].scrolling = 'no';
+							}
+						});
+					</script>
+					<!--<![endif]-->
+							</form>
+		</div>
+
+		
+		<input type="hidden" name="comment_parent" id="comment_parent" value="" />
+
+		
+</div><!-- #comments .comments-area -->
+
+			
+			</div><!-- #content -->
+		</div><!-- #primary .site-content -->
+
+		<div id="secondary" class="widget-area" role="complementary">
+						<aside id="search-4" class="widget widget_search">	<form method="get" id="searchform" action="https://blog.trailofbits.com/" role="search">
+		<label for="s" class="assistive-text">Search</label>
+		<input type="search" class="field" name="s" id="s" placeholder="Search &hellip;" />
+		<input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
+	</form>
+</aside><aside id="text-112416548" class="widget widget_text"><h1 class="widget-title">About Us</h1>			<div class="textwidget"><p>Since 2012, Trail of Bits has helped secure some of the world’s most targeted organizations and products. We combine high-­end security research with a real­ world attacker mentality to reduce risk and fortify code.</p>
+<p>Read more at <a href="https://www.trailofbits.com">www.trailofbits.com</a></p>
+</div>
+		</aside><aside id="rss_links-4" class="widget widget_rss_links"><h1 class="widget-title">Subscribe via RSS</h1><p><a target="_self" href="https://blog.trailofbits.com/feed/" title="Subscribe to posts"><img src="https://blog.trailofbits.com/wp-content/plugins/jetpack/images/rss/red-small.png" alt="RSS feed" />&nbsp;RSS - Posts</a></p>
+</aside>
+		<aside id="recent-posts-5" class="widget widget_recent_entries">
+		<h1 class="widget-title">Recent Posts</h1>
+		<ul>
+											<li>
+					<a href="https://blog.trailofbits.com/2023/03/30/acropalypse-polytracker-blind-spots/">How to avoid the aCropalypse</a>
+									</li>
+											<li>
+					<a href="https://blog.trailofbits.com/2023/03/22/codex-and-gpt4-cant-beat-humans-on-smart-contract-audits/">Codex (and GPT-4) can’t beat humans on smart contract audits</a>
+									</li>
+											<li>
+					<a href="https://blog.trailofbits.com/2023/03/21/circomspect-static-analyzer-circom-more-passes/">Circomspect has more passes!</a>
+									</li>
+											<li>
+					<a href="https://blog.trailofbits.com/2023/03/14/ai-security-safety-audit-assurance-heidy-khlaaf-odd/">We need a new way to measure AI security</a>
+									</li>
+											<li>
+					<a href="https://blog.trailofbits.com/2023/02/27/reusable-properties-ethereum-contracts-echidna/">Reusable properties for Ethereum contracts</a>
+									</li>
+											<li>
+					<a href="https://blog.trailofbits.com/2023/02/23/escaping-well-configured-vscode-extensions-for-profit/">Escaping well-configured VSCode extensions (for profit)</a>
+									</li>
+											<li>
+					<a href="https://blog.trailofbits.com/2023/02/21/vscode-extension-escape-vulnerability/">Escaping misconfigured VSCode extensions</a>
+									</li>
+											<li>
+					<a href="https://blog.trailofbits.com/2023/02/16/suid-logic-bug-linux-readline/">Readline crime: exploiting a SUID logic bug</a>
+									</li>
+											<li>
+					<a href="https://blog.trailofbits.com/2023/02/14/curl-audit-fuzzing-libcurl-command-line-interface/">cURL audit: How a joke led to significant findings</a>
+									</li>
+											<li>
+					<a href="https://blog.trailofbits.com/2023/01/19/ebpf-verifier-harness/">Harnessing the eBPF Verifier</a>
+									</li>
+											<li>
+					<a href="https://blog.trailofbits.com/2023/01/17/rpc-investigator-microsoft-windows-remote-procedure-call/">Introducing RPC Investigator</a>
+									</li>
+											<li>
+					<a href="https://blog.trailofbits.com/2023/01/13/sigstore-python/">Announcing a stable release of sigstore-python</a>
+									</li>
+											<li>
+					<a href="https://blog.trailofbits.com/2023/01/12/wolfssl-vulnerabilities-tlspuffin-fuzzing-ssh/">Keeping the wolves out of wolfSSL</a>
+									</li>
+											<li>
+					<a href="https://blog.trailofbits.com/2023/01/10/open-source-contributions-2022/">Another prolific year of open-source contributions</a>
+									</li>
+											<li>
+					<a href="https://blog.trailofbits.com/2022/12/22/curl-security-audit-threat-model/">How to share what you&#8217;ve learned from our audits</a>
+									</li>
+					</ul>
+
+		</aside><aside id="text-112416546" class="widget widget_text"><h1 class="widget-title">Yearly Archive</h1>			<div class="textwidget"><ul>
+<li><a href="https://blog.trailofbits.com/2020">2020</a></li>
+<li><a href="https://blog.trailofbits.com/2019">2019</a></li>
+<li><a href="https://blog.trailofbits.com/2018">2018</a></li>
+<li><a href="https://blog.trailofbits.com/2017">2017</a></li>
+<li><a href="https://blog.trailofbits.com/2016">2016</a></li>
+<li><a href="https://blog.trailofbits.com/2015">2015</a></li>
+<li><a href="https://blog.trailofbits.com/2014">2014</a></li>
+<li><a href="https://blog.trailofbits.com/2013">2013</a></li>
+<li><a href="https://blog.trailofbits.com/2012">2012</a></li>
+</ul></div>
+		</aside><aside id="categories-4" class="widget widget_categories"><h1 class="widget-title">Categories</h1>
+			<ul>
+					<li class="cat-item cat-item-291"><a href="https://blog.trailofbits.com/category/apple/">Apple</a> (13)
+</li>
+	<li class="cat-item cat-item-141319"><a href="https://blog.trailofbits.com/category/attacks/">Attacks</a> (11)
+</li>
+	<li class="cat-item cat-item-685590231"><a href="https://blog.trailofbits.com/category/audits/">Audits</a> (5)
+</li>
+	<li class="cat-item cat-item-44620"><a href="https://blog.trailofbits.com/category/authentication/">Authentication</a> (5)
+</li>
+	<li class="cat-item cat-item-502354744"><a href="https://blog.trailofbits.com/category/binary-ninja/">Binary Ninja</a> (14)
+</li>
+	<li class="cat-item cat-item-64575263"><a href="https://blog.trailofbits.com/category/blockchain/">Blockchain</a> (53)
+</li>
+	<li class="cat-item cat-item-1364812"><a href="https://blog.trailofbits.com/category/capture-the-flag/">Capture the Flag</a> (11)
+</li>
+	<li class="cat-item cat-item-685590242"><a href="https://blog.trailofbits.com/category/careers/">Careers</a> (2)
+</li>
+	<li class="cat-item cat-item-685590226"><a href="https://blog.trailofbits.com/category/codeql/">CodeQL</a> (3)
+</li>
+	<li class="cat-item cat-item-100030"><a href="https://blog.trailofbits.com/category/compilers/">Compilers</a> (24)
+</li>
+	<li class="cat-item cat-item-9204"><a href="https://blog.trailofbits.com/category/conferences/">Conferences</a> (28)
+</li>
+	<li class="cat-item cat-item-182564"><a href="https://blog.trailofbits.com/category/containers/">Containers</a> (2)
+</li>
+	<li class="cat-item cat-item-25818"><a href="https://blog.trailofbits.com/category/cryptography/">Cryptography</a> (42)
+</li>
+	<li class="cat-item cat-item-28634997"><a href="https://blog.trailofbits.com/category/crytic/">Crytic</a> (4)
+</li>
+	<li class="cat-item cat-item-199448218"><a href="https://blog.trailofbits.com/category/cyber-grand-challenge/">Cyber Grand Challenge</a> (7)
+</li>
+	<li class="cat-item cat-item-55871"><a href="https://blog.trailofbits.com/category/darpa/">DARPA</a> (21)
+</li>
+	<li class="cat-item cat-item-4181544"><a href="https://blog.trailofbits.com/category/dynamic-analysis/">Dynamic Analysis</a> (12)
+</li>
+	<li class="cat-item cat-item-1342"><a href="https://blog.trailofbits.com/category/education/">Education</a> (16)
+</li>
+	<li class="cat-item cat-item-551269408"><a href="https://blog.trailofbits.com/category/empire-hacking/">Empire Hacking</a> (7)
+</li>
+	<li class="cat-item cat-item-1360277"><a href="https://blog.trailofbits.com/category/engineering-practice/">Engineering Practice</a> (14)
+</li>
+	<li class="cat-item cat-item-924"><a href="https://blog.trailofbits.com/category/events/">Events</a> (6)
+</li>
+	<li class="cat-item cat-item-14563"><a href="https://blog.trailofbits.com/category/exploits/">Exploits</a> (29)
+</li>
+	<li class="cat-item cat-item-1643774"><a href="https://blog.trailofbits.com/category/fuzzing/">Fuzzing</a> (32)
+</li>
+	<li class="cat-item cat-item-2812"><a href="https://blog.trailofbits.com/category/go/">Go</a> (4)
+</li>
+	<li class="cat-item cat-item-320"><a href="https://blog.trailofbits.com/category/guides/">Guides</a> (12)
+</li>
+	<li class="cat-item cat-item-25357667"><a href="https://blog.trailofbits.com/category/internship-projects/">Internship Projects</a> (33)
+</li>
+	<li class="cat-item cat-item-96379492"><a href="https://blog.trailofbits.com/category/iverify/">iVerify</a> (4)
+</li>
+	<li class="cat-item cat-item-46713213"><a href="https://blog.trailofbits.com/category/kubernetes/">Kubernetes</a> (2)
+</li>
+	<li class="cat-item cat-item-610"><a href="https://blog.trailofbits.com/category/linux/">Linux</a> (2)
+</li>
+	<li class="cat-item cat-item-685590236"><a href="https://blog.trailofbits.com/category/machine-learning/">Machine Learning</a> (8)
+</li>
+	<li class="cat-item cat-item-15593"><a href="https://blog.trailofbits.com/category/malware/">Malware</a> (7)
+</li>
+	<li class="cat-item cat-item-1056516"><a href="https://blog.trailofbits.com/category/manticore/">Manticore</a> (17)
+</li>
+	<li class="cat-item cat-item-245013018"><a href="https://blog.trailofbits.com/category/mcsema/">McSema</a> (11)
+</li>
+	<li class="cat-item cat-item-171"><a href="https://blog.trailofbits.com/category/meta/">Meta</a> (12)
+</li>
+	<li class="cat-item cat-item-6701995"><a href="https://blog.trailofbits.com/category/mitigations/">Mitigations</a> (9)
+</li>
+	<li class="cat-item cat-item-293462444"><a href="https://blog.trailofbits.com/category/osquery/">osquery</a> (22)
+</li>
+	<li class="cat-item cat-item-208532"><a href="https://blog.trailofbits.com/category/paper-review/">Paper Review</a> (11)
+</li>
+	<li class="cat-item cat-item-685590244"><a href="https://blog.trailofbits.com/category/people/">People</a> (1)
+</li>
+	<li class="cat-item cat-item-685590238"><a href="https://blog.trailofbits.com/category/podcast/">Podcast</a> (1)
+</li>
+	<li class="cat-item cat-item-6672"><a href="https://blog.trailofbits.com/category/press-release/">Press Release</a> (28)
+</li>
+	<li class="cat-item cat-item-3279"><a href="https://blog.trailofbits.com/category/privacy/">Privacy</a> (9)
+</li>
+	<li class="cat-item cat-item-1589"><a href="https://blog.trailofbits.com/category/products/">Products</a> (7)
+</li>
+	<li class="cat-item cat-item-5030448"><a href="https://blog.trailofbits.com/category/program-analysis/">Program Analysis</a> (17)
+</li>
+	<li class="cat-item cat-item-685590239"><a href="https://blog.trailofbits.com/category/recruitment/">Recruitment</a> (1)
+</li>
+	<li class="cat-item cat-item-685590241"><a href="https://blog.trailofbits.com/category/remote-work/">Remote Work</a> (1)
+</li>
+	<li class="cat-item cat-item-113884"><a href="https://blog.trailofbits.com/category/research-practice/">Research Practice</a> (20)
+</li>
+	<li class="cat-item cat-item-299073"><a href="https://blog.trailofbits.com/category/reversing/">Reversing</a> (14)
+</li>
+	<li class="cat-item cat-item-185574"><a href="https://blog.trailofbits.com/category/rust/">Rust</a> (4)
+</li>
+	<li class="cat-item cat-item-685590219"><a href="https://blog.trailofbits.com/category/safedocs/">SafeDocs</a> (1)
+</li>
+	<li class="cat-item cat-item-685590218"><a href="https://blog.trailofbits.com/category/sinter/">Sinter</a> (1)
+</li>
+	<li class="cat-item cat-item-685590237"><a href="https://blog.trailofbits.com/category/slither/">Slither</a> (3)
+</li>
+	<li class="cat-item cat-item-401665"><a href="https://blog.trailofbits.com/category/sponsorships/">Sponsorships</a> (12)
+</li>
+	<li class="cat-item cat-item-538062"><a href="https://blog.trailofbits.com/category/static-analysis/">Static Analysis</a> (28)
+</li>
+	<li class="cat-item cat-item-19674948"><a href="https://blog.trailofbits.com/category/symbolic-execution/">Symbolic Execution</a> (18)
+</li>
+	<li class="cat-item cat-item-943"><a href="https://blog.trailofbits.com/category/training/">Training</a> (2)
+</li>
+	<li class="cat-item cat-item-1"><a href="https://blog.trailofbits.com/category/uncategorized/">Uncategorized</a> (27)
+</li>
+	<li class="cat-item cat-item-685590240"><a href="https://blog.trailofbits.com/category/working-at-trail-of-bits/">Working at Trail of Bits</a> (2)
+</li>
+	<li class="cat-item cat-item-29911"><a href="https://blog.trailofbits.com/category/year-in-review/">Year in Review</a> (5)
+</li>
+	<li class="cat-item cat-item-685590235"><a href="https://blog.trailofbits.com/category/zero-knowledge/">Zero Knowledge</a> (10)
+</li>
+			</ul>
+
+			</aside><aside id="twitter_timeline-3" class="widget widget_twitter_timeline"><a class="twitter-timeline" data-height="400" data-theme="light" data-border-color="#e8e8e8" data-tweet-limit="8" data-lang="EN" data-partner="jetpack" data-chrome="nofooter transparent" href="https://twitter.com/trailofbits" href="https://twitter.com/trailofbits">My Tweets</a></aside>		</div><!-- #secondary .widget-area -->
+
+	</div><!-- #main -->
+
+	<footer id="colophon" class="site-footer" role="contentinfo">
+		<div class="site-info">
+						
+			
+					</div><!-- .site-info -->
+	</footer><!-- .site-footer .site-footer -->
+</div><!-- #page .hfeed .site -->
+
+<!--  -->
+<style>
+			.sd-social-icon .sd-content ul li a.sd-button>span {
+				margin-left: 0;
+			}
+		</style><script defer id="bilmur" data-provider="wordpress.com" data-service="atomic"  src="https://s0.wp.com/wp-content/js/bilmur.min.js?m=202314"></script>
+	<div style="display:none">
+			<div class="grofile-hash-map-2edcdf4734a0e35ad60c5535989ddb17">
+		</div>
+		<div class="grofile-hash-map-068e30f19ad285ba33d10c3cab09a432">
+		</div>
+		<div class="grofile-hash-map-1877ff79ad26a6066fe7c1f729f30ac7">
+		</div>
+		</div>
+				<div id="jp-carousel-loading-overlay">
+			<div id="jp-carousel-loading-wrapper">
+				<span id="jp-carousel-library-loading">&nbsp;</span>
+			</div>
+		</div>
+		<div class="jp-carousel-overlay" style="display: none;">
+
+		<div class="jp-carousel-container">
+			<!-- The Carousel Swiper -->
+			<div
+				class="jp-carousel-wrap swiper-container jp-carousel-swiper-container jp-carousel-transitions"
+				itemscope
+				itemtype="https://schema.org/ImageGallery">
+				<div class="jp-carousel swiper-wrapper"></div>
+				<div class="jp-swiper-button-prev swiper-button-prev">
+					<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<mask id="maskPrev" mask-type="alpha" maskUnits="userSpaceOnUse" x="8" y="6" width="9" height="12">
+							<path d="M16.2072 16.59L11.6496 12L16.2072 7.41L14.8041 6L8.8335 12L14.8041 18L16.2072 16.59Z" fill="white"/>
+						</mask>
+						<g mask="url(#maskPrev)">
+							<rect x="0.579102" width="23.8823" height="24" fill="#FFFFFF"/>
+						</g>
+					</svg>
+				</div>
+				<div class="jp-swiper-button-next swiper-button-next">
+					<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<mask id="maskNext" mask-type="alpha" maskUnits="userSpaceOnUse" x="8" y="6" width="8" height="12">
+							<path d="M8.59814 16.59L13.1557 12L8.59814 7.41L10.0012 6L15.9718 12L10.0012 18L8.59814 16.59Z" fill="white"/>
+						</mask>
+						<g mask="url(#maskNext)">
+							<rect x="0.34375" width="23.8822" height="24" fill="#FFFFFF"/>
+						</g>
+					</svg>
+				</div>
+			</div>
+			<!-- The main close buton -->
+			<div class="jp-carousel-close-hint">
+				<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<mask id="maskClose" mask-type="alpha" maskUnits="userSpaceOnUse" x="5" y="5" width="15" height="14">
+						<path d="M19.3166 6.41L17.9135 5L12.3509 10.59L6.78834 5L5.38525 6.41L10.9478 12L5.38525 17.59L6.78834 19L12.3509 13.41L17.9135 19L19.3166 17.59L13.754 12L19.3166 6.41Z" fill="white"/>
+					</mask>
+					<g mask="url(#maskClose)">
+						<rect x="0.409668" width="23.8823" height="24" fill="#FFFFFF"/>
+					</g>
+				</svg>
+			</div>
+			<!-- Image info, comments and meta -->
+			<div class="jp-carousel-info">
+				<div class="jp-carousel-info-footer">
+					<div class="jp-carousel-pagination-container">
+						<div class="jp-swiper-pagination swiper-pagination"></div>
+						<div class="jp-carousel-pagination"></div>
+					</div>
+					<div class="jp-carousel-photo-title-container">
+						<h2 class="jp-carousel-photo-caption"></h2>
+					</div>
+					<div class="jp-carousel-photo-icons-container">
+						<a href="#" class="jp-carousel-icon-btn jp-carousel-icon-info" aria-label="Toggle photo metadata visibility">
+							<span class="jp-carousel-icon">
+								<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<mask id="maskInfo" mask-type="alpha" maskUnits="userSpaceOnUse" x="2" y="2" width="21" height="20">
+										<path fill-rule="evenodd" clip-rule="evenodd" d="M12.7537 2C7.26076 2 2.80273 6.48 2.80273 12C2.80273 17.52 7.26076 22 12.7537 22C18.2466 22 22.7046 17.52 22.7046 12C22.7046 6.48 18.2466 2 12.7537 2ZM11.7586 7V9H13.7488V7H11.7586ZM11.7586 11V17H13.7488V11H11.7586ZM4.79292 12C4.79292 16.41 8.36531 20 12.7537 20C17.142 20 20.7144 16.41 20.7144 12C20.7144 7.59 17.142 4 12.7537 4C8.36531 4 4.79292 7.59 4.79292 12Z" fill="white"/>
+									</mask>
+									<g mask="url(#maskInfo)">
+										<rect x="0.8125" width="23.8823" height="24" fill="#FFFFFF"/>
+									</g>
+								</svg>
+							</span>
+						</a>
+												<a href="#" class="jp-carousel-icon-btn jp-carousel-icon-comments" aria-label="Toggle photo comments visibility">
+							<span class="jp-carousel-icon">
+								<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<mask id="maskComments" mask-type="alpha" maskUnits="userSpaceOnUse" x="2" y="2" width="21" height="20">
+										<path fill-rule="evenodd" clip-rule="evenodd" d="M4.3271 2H20.2486C21.3432 2 22.2388 2.9 22.2388 4V16C22.2388 17.1 21.3432 18 20.2486 18H6.31729L2.33691 22V4C2.33691 2.9 3.2325 2 4.3271 2ZM6.31729 16H20.2486V4H4.3271V18L6.31729 16Z" fill="white"/>
+									</mask>
+									<g mask="url(#maskComments)">
+										<rect x="0.34668" width="23.8823" height="24" fill="#FFFFFF"/>
+									</g>
+								</svg>
+
+								<span class="jp-carousel-has-comments-indicator" aria-label="This image has comments."></span>
+							</span>
+						</a>
+											</div>
+				</div>
+				<div class="jp-carousel-info-extra">
+					<div class="jp-carousel-info-content-wrapper">
+						<div class="jp-carousel-photo-title-container">
+							<h2 class="jp-carousel-photo-title"></h2>
+						</div>
+						<div class="jp-carousel-comments-wrapper">
+															<div id="jp-carousel-comments-loading">
+									<span>Loading Comments...</span>
+								</div>
+								<div class="jp-carousel-comments"></div>
+								<div id="jp-carousel-comment-form-container">
+									<span id="jp-carousel-comment-form-spinner">&nbsp;</span>
+									<div id="jp-carousel-comment-post-results"></div>
+																														<form id="jp-carousel-comment-form">
+												<label for="jp-carousel-comment-form-comment-field" class="screen-reader-text">Write a Comment...</label>
+												<textarea
+													name="comment"
+													class="jp-carousel-comment-form-field jp-carousel-comment-form-textarea"
+													id="jp-carousel-comment-form-comment-field"
+													placeholder="Write a Comment..."
+												></textarea>
+												<div id="jp-carousel-comment-form-submit-and-info-wrapper">
+													<div id="jp-carousel-comment-form-commenting-as">
+																													<fieldset>
+																<label for="jp-carousel-comment-form-email-field">Email (Required)</label>
+																<input type="text" name="email" class="jp-carousel-comment-form-field jp-carousel-comment-form-text-field" id="jp-carousel-comment-form-email-field" />
+															</fieldset>
+															<fieldset>
+																<label for="jp-carousel-comment-form-author-field">Name (Required)</label>
+																<input type="text" name="author" class="jp-carousel-comment-form-field jp-carousel-comment-form-text-field" id="jp-carousel-comment-form-author-field" />
+															</fieldset>
+															<fieldset>
+																<label for="jp-carousel-comment-form-url-field">Website</label>
+																<input type="text" name="url" class="jp-carousel-comment-form-field jp-carousel-comment-form-text-field" id="jp-carousel-comment-form-url-field" />
+															</fieldset>
+																											</div>
+													<input
+														type="submit"
+														name="submit"
+														class="jp-carousel-comment-form-button"
+														id="jp-carousel-comment-form-button-submit"
+														value="Post Comment" />
+												</div>
+											</form>
+																											</div>
+													</div>
+						<div class="jp-carousel-image-meta">
+							<div class="jp-carousel-title-and-caption">
+								<div class="jp-carousel-photo-info">
+									<h3 class="jp-carousel-caption" itemprop="caption description"></h3>
+								</div>
+
+								<div class="jp-carousel-photo-description"></div>
+							</div>
+							<ul class="jp-carousel-image-exif" style="display: none;"></ul>
+							<a class="jp-carousel-image-download" target="_blank" style="display: none;">
+								<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<mask id="mask0" mask-type="alpha" maskUnits="userSpaceOnUse" x="3" y="3" width="19" height="18">
+										<path fill-rule="evenodd" clip-rule="evenodd" d="M5.84615 5V19H19.7775V12H21.7677V19C21.7677 20.1 20.8721 21 19.7775 21H5.84615C4.74159 21 3.85596 20.1 3.85596 19V5C3.85596 3.9 4.74159 3 5.84615 3H12.8118V5H5.84615ZM14.802 5V3H21.7677V10H19.7775V6.41L9.99569 16.24L8.59261 14.83L18.3744 5H14.802Z" fill="white"/>
+									</mask>
+									<g mask="url(#mask0)">
+										<rect x="0.870605" width="23.8823" height="24" fill="#FFFFFF"/>
+									</g>
+								</svg>
+								<span class="jp-carousel-download-text"></span>
+							</a>
+							<div class="jp-carousel-image-map" style="display: none;"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		</div>
+		
+	<script type="text/javascript">
+		window.WPCOM_sharing_counts = {"https:\/\/blog.trailofbits.com\/2020\/06\/11\/ecdsa-handle-with-care\/":99991};
+	</script>
+				<script type='text/javascript'  src='https://blog.trailofbits.com/_static/??-eJwrL9BNzs8rSc0r0S/IKU3PzCvWL67MK0msyMhMz8gB4pLUIkwRY/3i5KLMghKg4gzn/KJUvaxinXKKTXIqKi3OCKgsycjPAxpon2traGZqZG5sbGZgDADMrEA7'></script>
+<script type='text/javascript'>
+	(function(){
+		var corecss = document.createElement('link');
+		var themecss = document.createElement('link');
+		var corecssurl = "https://blog.trailofbits.com/wp-content/plugins/syntaxhighlighter/syntaxhighlighter3/styles/shCore.css?ver=3.0.9b";
+		if ( corecss.setAttribute ) {
+				corecss.setAttribute( "rel", "stylesheet" );
+				corecss.setAttribute( "type", "text/css" );
+				corecss.setAttribute( "href", corecssurl );
+		} else {
+				corecss.rel = "stylesheet";
+				corecss.href = corecssurl;
+		}
+		document.head.appendChild( corecss );
+		var themecssurl = "https://blog.trailofbits.com/wp-content/plugins/syntaxhighlighter/syntaxhighlighter3/styles/shThemeDefault.css?ver=3.0.9b";
+		if ( themecss.setAttribute ) {
+				themecss.setAttribute( "rel", "stylesheet" );
+				themecss.setAttribute( "type", "text/css" );
+				themecss.setAttribute( "href", themecssurl );
+		} else {
+				themecss.rel = "stylesheet";
+				themecss.href = themecssurl;
+		}
+		document.head.appendChild( themecss );
+	})();
+	SyntaxHighlighter.config.strings.expandSource = '+ expand source';
+	SyntaxHighlighter.config.strings.help = '?';
+	SyntaxHighlighter.config.strings.alert = 'SyntaxHighlighter\n\n';
+	SyntaxHighlighter.config.strings.noBrush = 'Can\'t find brush for: ';
+	SyntaxHighlighter.config.strings.brushNotHtmlScript = 'Brush wasn\'t configured for html-script option: ';
+	SyntaxHighlighter.defaults['pad-line-numbers'] = false;
+	SyntaxHighlighter.defaults['toolbar'] = false;
+	SyntaxHighlighter.all();
+
+	// Infinite scroll support
+	if ( typeof( jQuery ) !== 'undefined' ) {
+		jQuery( function( $ ) {
+			$( document.body ).on( 'post-load', function() {
+				SyntaxHighlighter.highlight();
+			} );
+		} );
+	}
+</script>
+<link rel='stylesheet' id='all-css-091572bd70cdb9b77f4104ae6b4b8446' href='https://blog.trailofbits.com/_static/??-eJyVjFsKgCAQAC+ULQaZP9FZTJewfOG6eP0I6gD9zjDTi7A5NUwNSuDDJ4ITWzH2gpgdBySwpmYmDEDdF6xi5+QCjpZo6D/qV4gPPIMtrlItk5y1VvoGzj40MA==' type='text/css' media='all' />
+<script type='text/javascript'  src='https://blog.trailofbits.com/_static/??wp-content/plugins/jetpack/_inc/build/photon/photon.min.js,wp-content/plugins/coblocks/dist/js/coblocks-animation.js?m=1679966314'></script>
+<script src='https://secure.gravatar.com/js/gprofiles.js?ver=202314' id='grofiles-cards-js'></script>
+<script id='wpgroho-js-extra'>
+var WPGroHo = {"my_hash":""};
+</script>
+<script id='jetpack-lazy-images-js-extra'>
+var jetpackLazyImagesL10n = {"loading_warning":"Images are still loading. Please cancel your print and try again."};
+</script>
+<script type='text/javascript'  src='https://blog.trailofbits.com/_static/??-eJytUMtuAjEM/KEGU6kgeqj6KSgk1q4X29kmDqvt19cSoFacOPRkyfPweJY5pKKGajBzH0gbTGhzTGeQkjtjg2UeahnLZmovyy/bRhQH8YJ1zXGFqUGTyBwEtd+4pIl7dpaDqYgjFirOvG6E9MHv8frRxXDqxBlsITOswUiQSfEJ9W0eL6i5VIjdikQzSnckcPxeA0kcPF6mZkDuVBsmo6KhnBpWf+3/z/xZPN8A09n1Xx07jlEze7BrB5/y8bo/bPe77fvh7QcF56+s'></script>
+<script defer src='https://stats.wp.com/e-202314.js' id='jetpack-stats-js'></script>
+<script id='jetpack-stats-js-after'>
+_stq = window._stq || [];
+_stq.push([ "view", {v:'ext',blog:'3681601',post:'99991',tz:'-4',srv:'blog.trailofbits.com',hp:'atomic',ac:'2',amp:'0',j:'1:12.1-a.3'} ]);
+_stq.push([ "clickTrackerInit", "3681601", "99991" ]);
+</script>
+<script id='jetpack-carousel-js-extra'>
+var jetpackSwiperLibraryPath = {"url":"https:\/\/blog.trailofbits.com\/wp-content\/plugins\/jetpack\/_inc\/build\/carousel\/swiper-bundle.min.js"};
+var jetpackCarouselStrings = {"widths":[370,700,1000,1200,1400,2000],"is_logged_in":"","lang":"en","ajaxurl":"https:\/\/blog.trailofbits.com\/wp-admin\/admin-ajax.php","nonce":"4fd38b805e","display_exif":"0","display_comments":"1","single_image_gallery":"1","single_image_gallery_media_file":"","background_color":"black","comment":"Comment","post_comment":"Post Comment","write_comment":"Write a Comment...","loading_comments":"Loading Comments...","download_original":"View full size <span class=\"photo-size\">{0}<span class=\"photo-size-times\">\u00d7<\/span>{1}<\/span>","no_comment_text":"Please be sure to submit some text with your comment.","no_comment_email":"Please provide an email address to comment.","no_comment_author":"Please provide your name to comment.","comment_post_error":"Sorry, but there was an error posting your comment. Please try again later.","comment_approved":"Your comment was approved.","comment_unapproved":"Your comment is in moderation.","camera":"Camera","aperture":"Aperture","shutter_speed":"Shutter Speed","focal_length":"Focal Length","copyright":"Copyright","comment_registration":"0","require_name_email":"1","login_url":"https:\/\/blog.trailofbits.com\/wp-login.php?redirect_to=https%3A%2F%2Fblog.trailofbits.com%2F2020%2F06%2F11%2Fecdsa-handle-with-care%2F","blog_id":"1","meta_data":["camera","aperture","shutter_speed","focal_length","copyright"]};
+</script>
+<script type='text/javascript'  src='https://blog.trailofbits.com/_static/??wp-content/plugins/jetpack/_inc/build/carousel/jetpack-carousel.min.js,wp-content/plugins/akismet/_inc/akismet-frontend.js?m=1680650984'></script>
+<script id='sharing-js-js-extra'>
+var sharing_js_options = {"lang":"en","counts":"1","is_stats_active":"1"};
+</script>
+<script src='https://blog.trailofbits.com/wp-content/plugins/jetpack/_inc/build/sharedaddy/sharing.min.js?ver=12.1-a.3' id='sharing-js-js'></script>
+<script id='sharing-js-js-after'>
+var windowOpen;
+			( function () {
+				function matches( el, sel ) {
+					return !! (
+						el.matches && el.matches( sel ) ||
+						el.msMatchesSelector && el.msMatchesSelector( sel )
+					);
+				}
+
+				document.body.addEventListener( 'click', function ( event ) {
+					if ( ! event.target ) {
+						return;
+					}
+
+					var el;
+					if ( matches( event.target, 'a.share-twitter' ) ) {
+						el = event.target;
+					} else if ( event.target.parentNode && matches( event.target.parentNode, 'a.share-twitter' ) ) {
+						el = event.target.parentNode;
+					}
+
+					if ( el ) {
+						event.preventDefault();
+
+						// If there's another sharing window open, close it.
+						if ( typeof windowOpen !== 'undefined' ) {
+							windowOpen.close();
+						}
+						windowOpen = window.open( el.getAttribute( 'href' ), 'wpcomtwitter', 'menubar=1,resizable=1,width=600,height=350' );
+						return false;
+					}
+				} );
+			} )();
+var windowOpen;
+			( function () {
+				function matches( el, sel ) {
+					return !! (
+						el.matches && el.matches( sel ) ||
+						el.msMatchesSelector && el.msMatchesSelector( sel )
+					);
+				}
+
+				document.body.addEventListener( 'click', function ( event ) {
+					if ( ! event.target ) {
+						return;
+					}
+
+					var el;
+					if ( matches( event.target, 'a.share-linkedin' ) ) {
+						el = event.target;
+					} else if ( event.target.parentNode && matches( event.target.parentNode, 'a.share-linkedin' ) ) {
+						el = event.target.parentNode;
+					}
+
+					if ( el ) {
+						event.preventDefault();
+
+						// If there's another sharing window open, close it.
+						if ( typeof windowOpen !== 'undefined' ) {
+							windowOpen.close();
+						}
+						windowOpen = window.open( el.getAttribute( 'href' ), 'wpcomlinkedin', 'menubar=1,resizable=1,width=580,height=450' );
+						return false;
+					}
+				} );
+			} )();
+var windowOpen;
+			( function () {
+				function matches( el, sel ) {
+					return !! (
+						el.matches && el.matches( sel ) ||
+						el.msMatchesSelector && el.msMatchesSelector( sel )
+					);
+				}
+
+				document.body.addEventListener( 'click', function ( event ) {
+					if ( ! event.target ) {
+						return;
+					}
+
+					var el;
+					if ( matches( event.target, 'a.share-telegram' ) ) {
+						el = event.target;
+					} else if ( event.target.parentNode && matches( event.target.parentNode, 'a.share-telegram' ) ) {
+						el = event.target.parentNode;
+					}
+
+					if ( el ) {
+						event.preventDefault();
+
+						// If there's another sharing window open, close it.
+						if ( typeof windowOpen !== 'undefined' ) {
+							windowOpen.close();
+						}
+						windowOpen = window.open( el.getAttribute( 'href' ), 'wpcomtelegram', 'menubar=1,resizable=1,width=450,height=450' );
+						return false;
+					}
+				} );
+			} )();
+var windowOpen;
+			( function () {
+				function matches( el, sel ) {
+					return !! (
+						el.matches && el.matches( sel ) ||
+						el.msMatchesSelector && el.msMatchesSelector( sel )
+					);
+				}
+
+				document.body.addEventListener( 'click', function ( event ) {
+					if ( ! event.target ) {
+						return;
+					}
+
+					var el;
+					if ( matches( event.target, 'a.share-facebook' ) ) {
+						el = event.target;
+					} else if ( event.target.parentNode && matches( event.target.parentNode, 'a.share-facebook' ) ) {
+						el = event.target.parentNode;
+					}
+
+					if ( el ) {
+						event.preventDefault();
+
+						// If there's another sharing window open, close it.
+						if ( typeof windowOpen !== 'undefined' ) {
+							windowOpen.close();
+						}
+						windowOpen = window.open( el.getAttribute( 'href' ), 'wpcomfacebook', 'menubar=1,resizable=1,width=600,height=400' );
+						return false;
+					}
+				} );
+			} )();
+var windowOpen;
+			( function () {
+				function matches( el, sel ) {
+					return !! (
+						el.matches && el.matches( sel ) ||
+						el.msMatchesSelector && el.msMatchesSelector( sel )
+					);
+				}
+
+				document.body.addEventListener( 'click', function ( event ) {
+					if ( ! event.target ) {
+						return;
+					}
+
+					var el;
+					if ( matches( event.target, 'a.share-pocket' ) ) {
+						el = event.target;
+					} else if ( event.target.parentNode && matches( event.target.parentNode, 'a.share-pocket' ) ) {
+						el = event.target.parentNode;
+					}
+
+					if ( el ) {
+						event.preventDefault();
+
+						// If there's another sharing window open, close it.
+						if ( typeof windowOpen !== 'undefined' ) {
+							windowOpen.close();
+						}
+						windowOpen = window.open( el.getAttribute( 'href' ), 'wpcompocket', 'menubar=1,resizable=1,width=450,height=450' );
+						return false;
+					}
+				} );
+			} )();
+</script>
+	<iframe src='https://widgets.wp.com/likes/master.html?ver=202314#ver=202314' scrolling='no' id='likes-master' name='likes-master' style='display:none;'></iframe>
+	<div id='likes-other-gravatars'><div class="likes-text"><span>%d</span> bloggers like this:</div><ul class="wpl-avatars sd-like-gravatars"></ul></div>
+	
+		<!--[if IE]>
+		<script type="text/javascript">
+			if ( 0 === window.location.hash.indexOf( '#comment-' ) ) {
+				// window.location.reload() doesn't respect the Hash in IE
+				window.location.hash = window.location.hash;
+			}
+		</script>
+		<![endif]-->
+		<script type="text/javascript">
+			(function () {
+				var comm_par_el = document.getElementById( 'comment_parent' ),
+					comm_par = ( comm_par_el && comm_par_el.value ) ? comm_par_el.value : '',
+					frame = document.getElementById( 'jetpack_remote_comment' ),
+					tellFrameNewParent;
+
+				tellFrameNewParent = function () {
+					if ( comm_par ) {
+						frame.src = "https://jetpack.wordpress.com/jetpack-comment/?blogid=3681601&postid=99991&comment_registration=0&require_name_email=1&stc_enabled=1&stb_enabled=1&show_avatars=1&avatar_default=identicon&greeting=Leave+a+Reply&jetpack_comments_nonce=cb0a15f44c&greeting_reply=Leave+a+Reply+to+%25s&color_scheme=light&lang=en_US&jetpack_version=12.1-a.3&show_cookie_consent=10&has_cookie_consent=0&token_key=%3Bnormal%3B&sig=74db882dac5224545d02bfa4c992409c4a936209#parent=https%3A%2F%2Fblog.trailofbits.com%2F2020%2F06%2F11%2Fecdsa-handle-with-care%2F" + '&replytocom=' + parseInt( comm_par, 10 ).toString();
+					} else {
+						frame.src = "https://jetpack.wordpress.com/jetpack-comment/?blogid=3681601&postid=99991&comment_registration=0&require_name_email=1&stc_enabled=1&stb_enabled=1&show_avatars=1&avatar_default=identicon&greeting=Leave+a+Reply&jetpack_comments_nonce=cb0a15f44c&greeting_reply=Leave+a+Reply+to+%25s&color_scheme=light&lang=en_US&jetpack_version=12.1-a.3&show_cookie_consent=10&has_cookie_consent=0&token_key=%3Bnormal%3B&sig=74db882dac5224545d02bfa4c992409c4a936209#parent=https%3A%2F%2Fblog.trailofbits.com%2F2020%2F06%2F11%2Fecdsa-handle-with-care%2F";
+					}
+				};
+
+				
+				if ( 'undefined' !== typeof addComment ) {
+					addComment._Jetpack_moveForm = addComment.moveForm;
+
+					addComment.moveForm = function ( commId, parentId, respondId, postId ) {
+						var returnValue = addComment._Jetpack_moveForm( commId, parentId, respondId, postId ),
+							cancelClick, cancel;
+
+						if ( false === returnValue ) {
+							cancel = document.getElementById( 'cancel-comment-reply-link' );
+							cancelClick = cancel.onclick;
+							cancel.onclick = function () {
+								var cancelReturn = cancelClick.call( this );
+								if ( false !== cancelReturn ) {
+									return cancelReturn;
+								}
+
+								if ( ! comm_par ) {
+									return cancelReturn;
+								}
+
+								comm_par = 0;
+
+								tellFrameNewParent();
+
+								return cancelReturn;
+							};
+						}
+
+						if ( comm_par == parentId ) {
+							return returnValue;
+						}
+
+						comm_par = parentId;
+
+						tellFrameNewParent();
+
+						return returnValue;
+					};
+				}
+
+				
+				// Do the post message bit after the dom has loaded.
+				document.addEventListener( 'DOMContentLoaded', function () {
+					var iframe_url = "https:\/\/jetpack.wordpress.com";
+					if ( window.postMessage ) {
+						if ( document.addEventListener ) {
+							window.addEventListener( 'message', function ( event ) {
+								var origin = event.origin.replace( /^http:\/\//i, 'https://' );
+								if ( iframe_url.replace( /^http:\/\//i, 'https://' ) !== origin ) {
+									return;
+								}
+								frame.style.height = event.data + 'px';
+							});
+						} else if ( document.attachEvent ) {
+							window.attachEvent( 'message', function ( event ) {
+								var origin = event.origin.replace( /^http:\/\//i, 'https://' );
+								if ( iframe_url.replace( /^http:\/\//i, 'https://' ) !== origin ) {
+									return;
+								}
+								frame.style.height = event.data + 'px';
+							});
+						}
+					}
+				})
+
+			})();
+		</script>
+
+		
+</body>
+</html>
+<!--
+	generated 45 seconds ago
+	generated in 0.195 seconds
+	served from batcache in 0.002 seconds
+	expires in 255 seconds
+-->
