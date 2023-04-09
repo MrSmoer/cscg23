@@ -18,10 +18,8 @@ FLAG = open("/opt/flag.txt").read()
 
 def efficient_k(msg):
     # Make semi-deterministic to not exhaust the entropy pool too fast
-    shakedd=shake_128(msg)
-    shaked=shakedd.digest(16) #b'Ysj\xc62N\xf9\xac\xf2P\xfcp\xdc\xdbl\x80'
     return int.from_bytes(
-        shaked + os.urandom(16),
+        shake_128(msg).digest(16) + os.urandom(16),
         "big"
     )
 
@@ -38,9 +36,9 @@ def sign_msg(priv_key):
     
     if b"flag" in msg:
         print("No way, jose!")
-        return         #40459767864840525794187798386787837560692061108503359635509978137016703386682
-    k=efficient_k(msg) #40459767864840525794187798386787837560993544400736178823728596704611495870097
-    sig = priv_key.sign(msg, k=k)
+        return
+
+    sig = priv_key.sign(msg, k=efficient_k(msg))
 
     print("Signature (hex):", sig.hex())
 

@@ -21,5 +21,5 @@ RUN pip3 install -r requirements.txt
 COPY flag.txt /opt/flag.txt
 
 COPY --from=builder /ynetd-0.1.2/ynetd /ynetd
-
+EXPOSE 1024
 CMD /ynetd -p 1024 "python3 main.py"
