@@ -1,0 +1,15 @@
+/home/anton/cscg/unicorn/target/debug/deps/region-1cfecda15830960f.rmeta: /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/lib.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/alloc.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/error.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/lock.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/os/mod.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/os/unix.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/os/linux.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/page.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/protect.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/query.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/util.rs
+
+/home/anton/cscg/unicorn/target/debug/deps/region-1cfecda15830960f.d: /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/lib.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/alloc.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/error.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/lock.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/os/mod.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/os/unix.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/os/linux.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/page.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/protect.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/query.rs /home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/util.rs
+
+/home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/lib.rs:
+/home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/alloc.rs:
+/home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/error.rs:
+/home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/lock.rs:
+/home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/os/mod.rs:
+/home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/os/unix.rs:
+/home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/os/linux.rs:
+/home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/page.rs:
+/home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/protect.rs:
+/home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/query.rs:
+/home/anton/.cargo/registry/src/github.com-1ecc6299db9ec823/region-3.0.0/src/util.rs:

@@ -1,0 +1,34 @@
+            'p' push r0
+            'P' push r1
+            'q' pop r0
+            'Q' pop r1
+
+            'C' call size4
+            'R' return totopofstack
+
+            'j' jump R0
+            'J' jump from parsed ar
+            'e' jump equal R0
+            'E' jump equal from_parsed_arg
+            'n' jump not equal R0
+            'N' jump not equal from_parsed_arg
+
+            '+' add
+            '-' sub
+            '&' and
+            '|' or
+            '^' xor
+
+            '<' mov r0 -> r1
+            '>' mov r1 -> r0
+            'm' mov const -> r0  calls from_parsed_arg
+            'M' mov const -> r1 calls from_parsed_arg
+
+             'l' load r0, R1 = content of memory at R0
+             'L' load const addr [0; 4], R1 = content of memory at given addr
+            's' store r0, content of memory at R0 = R1
+            'S' store const addr [0; 4], cotent of memory at given addr = R1
+
+            '#' interrupt 'i' - IoRead, 'o' IoWrite
+            '.'  nop
+            'H'  halt

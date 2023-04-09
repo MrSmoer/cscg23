@@ -1,0 +1,19 @@
+--2023-04-01 17:13:50--  https://www.startpage.com/av/proxy-image?piurl=https%3A%2F%2Fwww.experto.de%2Fwp-content%2Fuploads%2F2014%2F12%2FAdobeStock_256435907.jpg
+Auflösen des Hostnamens www.startpage.com… 145.131.132.94
+Verbindungsaufbau zu www.startpage.com|145.131.132.94|:443 … verbunden.
+HTTP-Anforderung gesendet, auf Antwort wird gewartet … 307 Temporary Redirect
+Platz: https://www.startpage.com/ [folgend]
+--2023-04-01 17:13:50--  https://www.startpage.com/
+Wiederverwendung der bestehenden Verbindung zu www.startpage.com:443.
+HTTP-Anforderung gesendet, auf Antwort wird gewartet … 307 TEMPORARY REDIRECT
+Platz: https://www.startpage.com/sp/captcha-block#?bc=DE&bi=Versatel+Deutschland&be=65a092c3e16262b4db5293cc327a2eaf&bds_t=1680362015T3a326a62b1a65c8b735bcfbdcf6c5a53e696e6e7ee8de0542443757785fbe960&cat=web&language=english&lui=english&t=&cmd=gen_page [folgend]
+--2023-04-01 17:13:50--  https://www.startpage.com/sp/captcha-block
+Wiederverwendung der bestehenden Verbindung zu www.startpage.com:443.
+HTTP-Anforderung gesendet, auf Antwort wird gewartet … 200 OK
+Länge: 69451 (68K) [text/html]
+Wird in »proxy-image?piurl=https:%2F%2Fwww.experto.de%2Fwp-content%2Fuploads%2F2014%2F12%2FAdobeStock_256435907.jpg« gespeichert.
+
+              proxy-image?p   0%[                                          ]       0  --.-KB/s               proxy-image?piurl=https:%2F 100%[=========================================>]  67,82K  --.-KB/s    in 0,03s   
+
+2023-04-01 17:13:50 (2,43 MB/s) - »proxy-image?piurl=https:%2F%2Fwww.experto.de%2Fwp-content%2Fuploads%2F2014%2F12%2FAdobeStock_256435907.jpg« gespeichert [69451/69451]
+
