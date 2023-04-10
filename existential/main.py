@@ -2,7 +2,7 @@ import ecdsa
 import ecdsa.curves
 import os
 from hashlib import shake_128
-
+from ecdsa.ecdsa import Private_key,Public_key
 
 BANNER = """
 WELCOME to the demo version of sig1337nature.
@@ -31,15 +31,16 @@ def read_hex(prompt):
         raise ValueError("That's not valid hex. Learn to type.")
 
 
-def sign_msg(priv_key):
+def sign_msg(priv_key:ecdsa.SigningKey):
     msg = read_hex("Message")
     
     if b"flag" in msg:
         print("No way, jose!")
         return
-
-    sig = priv_key.sign(msg, k=efficient_k(msg))
-
+    k=efficient_k(msg)
+    print(k)
+    sig = priv_key.sign(msg, k=k)
+    #print("r: "+sig.r,"s: "+sig.s)
     print("Signature (hex):", sig.hex())
 
 
@@ -62,7 +63,9 @@ def main():
 
     privkey = ecdsa.SigningKey.generate(curve=ecdsa.curves.BRAINPOOLP256r1)
     pubkey = privkey.get_verifying_key()
-
+    print("PUBKEY: "+str(pubkey))
+    print("PRIVKEY: "+str(privkey.to_pem()))
+    print("Order: "+str(ecdsa.BRAINPOOLP256r1.generator.order()))
     for _ in range(69):  # nice
         print()
         print("You can:")
