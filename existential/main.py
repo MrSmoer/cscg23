@@ -64,8 +64,11 @@ def main():
     privkey = ecdsa.SigningKey.generate(curve=ecdsa.curves.BRAINPOOLP256r1)
     pubkey = privkey.get_verifying_key()
     print("PUBKEY: "+str(pubkey))
-    print("PRIVKEY: "+str(privkey.to_pem()))
+    print("PRIVKEY: "+str(privkey.privkey.secret_multiplier))
     print("Order: "+str(ecdsa.BRAINPOOLP256r1.generator.order()))
+    print()
+    msg=b"flag".hex().encode('ascii')
+    print("SIG: "+str(privkey.sign(msg, k=21435759786867865).hex()))
     for _ in range(69):  # nice
         print()
         print("You can:")
