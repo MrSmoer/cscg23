@@ -5,9 +5,9 @@
 #include <string.h>
 
 #define MAX_TASKS 50
-#define TASK_NAME 0x10
+#define TASK_NAME 0x10 //16
 #define MAX_SUBTASKS 24
-#define MAX_SUBTASK_LENGTH 0x100
+#define MAX_SUBTASK_LENGTH 0x100 //256
 
 typedef struct Subtask
 {
