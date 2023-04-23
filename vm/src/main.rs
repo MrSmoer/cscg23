@@ -312,10 +312,12 @@ impl Insn {
                 // cannot use the macro here because op_size is the load size not the size of the addr
                 let mut addr = [0; 4];
                 let nread = reader.read(&mut addr).ok().unwrap_or(0);
+
                 if nread != addr.len() {
                     None
                 } else {
                     size += nread as u8;
+
                     Some(Insn {
                         ty: InsnType::Load(as_u32_le(&addr)),
                         size,
@@ -395,7 +397,7 @@ impl Insn {
     pub fn execute(&self, regs: &mut Registers, memory: &mut Memory) -> Option<Execution> {
         let mut assume = PartialRegisters::new(regs.pc);
         regs.pc += self.size as u32;
-        //println!("executing instruction");
+
         // an execution which always fails validation
         const INVALID_EXECUTION: Option<Execution> = Some(Execution {
             assume: PartialRegisters {
@@ -1409,7 +1411,6 @@ fn main() {
     let pc = 0x100000u32;
     let sp = 0x200000u32;
     let xx = 0x300000u32;
-    print!("hello\n");
     let mm = 0x400000u32;
 
     let mut memory = Memory::new();
@@ -1458,7 +1459,6 @@ fn main() {
             } else {
                 None
             };
-            //print!("r0: {}, r1: {}\n",registers.r0,registers.r1);
 
             let is_write = result
                 .as_ref()
@@ -1476,7 +1476,7 @@ fn main() {
                     continue;
                 }
             }
-            //print!("r0: {}, r1: {}\n",registers.r0,registers.r1);
+
             if send.send(result).is_err() {
                 break;
             }
@@ -1495,7 +1495,6 @@ fn main() {
                 }
                 VerificationResult::IoRequest((req, next_pc)) => {
                     registers = validator_handle_io(req, next_pc, &registers);
-                    //println!("iorequest");
                 }
                 VerificationResult::Reset(reset_caches) => {
                     validator_force_reset(
@@ -1514,7 +1513,6 @@ fn main() {
             }
         } else {
             do_run_validator.store(false, Ordering::Relaxed);
-            print!("faild r0: {}, r1: {}\n",registers.r0,registers.r1);
             break;
         }
     }

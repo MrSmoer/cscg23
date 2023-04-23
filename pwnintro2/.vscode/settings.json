@@ -1,0 +1,19 @@
+{
+    "python.analysis.typeCheckingMode": "basic",
+    "files.associations": {
+        "*.tcc": "c",
+        "__config": "c",
+        "__locale": "c",
+        "bitset": "c",
+        "fstream": "c",
+        "iomanip": "c",
+        "locale": "c",
+        "ostream": "c",
+        "string": "c",
+        "string_view": "c",
+        "tuple": "c",
+        "*.txx": "c",
+        "array": "c",
+        "sstream": "c"
+    }
+}

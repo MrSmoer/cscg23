@@ -1,5 +1,5 @@
 bin
-lib/*
+lib
 lib64
 pwntools-doc
 pyvenv.cfg
