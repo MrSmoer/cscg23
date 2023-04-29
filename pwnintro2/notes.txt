@@ -1,10 +1,29 @@
 flag at stack base +fe3, need to print from fde, bc stuct takes length before
 p (char*)getenv("FLAG")
 
+
+
+vulnerabilites:
+-unchecked subtask-deletion: we can index the tasks and or subtasks negatively
+-unchecked task deletion: we can index the tasks negatively
+-unchecked creation: we can create subtasks for negative tasks
+-we can place subtask addresses on the task list
+-_IO_2_1_stdout_ is before our tasks
+-somehow strrchr didn't remove the \n, because there was one behind in heap
+
+We just need one UAF
+
 --> we need to write stack addr of flag to the subtasks list
 
 --> be able to write into subtask list
     we can free task in heap if we know heap address, then we allocate something different with stackaddr as smth we control
     -->
-        leak heap addr
+        leak heap addr x
+        --> heap addres shows up before begin of allocatable space, but this the double free protection
+        --> make fake free task chunk, create new task into free chunk, subtasks will leak heap addr
 --> leak stack base
+
+okay, somehow the environ thing is not consistent, you need to paste the last address from terminal into python console, remove the last hex, increment the second to last, and add 3 zeros, enter, paste integer into console, works sometimes
+
+2nd half CSCG{house_of_1337_h4x0rz_p0w3r1ng_up_to_RCE}
+lining?  CSCG{testflag}

