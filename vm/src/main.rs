@@ -319,6 +319,7 @@ impl Insn {
                     size += nread as u8;
 
                     Some(Insn {
+                        //addr is an ACTUAL pointer
                         ty: InsnType::Load(as_u32_le(&addr)),
                         size,
                         op_size,
@@ -876,6 +877,7 @@ impl Insn {
             InsnType::Int(IntType::Io(io_request)) => {
                 // no need to assume here because io is handled in-order
                 // assume.r0 = Some(regs.r0)
+                //HERE
 
                 let result = ExecutionResult {
                     regs: regs.clone(),
@@ -1262,6 +1264,7 @@ impl Verifier {
     }
 
     fn verify_execution(&self, regs: &Registers, execution: &Execution) -> VerificationResult {
+        // == is overriden!
         if &execution.assume == regs {
             let mut errors = false;
 
@@ -1420,7 +1423,7 @@ fn main() {
     mmap_unchecked(sp, 0x1000, Perm::RW, &mut memory, &mut verifier);
     mmap_unchecked(mm, 0x1000, Perm::RW, &mut memory, &mut verifier);
 
-    let flag = env::var("CSCG_VM_FLAG").unwrap_or("CSCG{redacted}".to_string());
+    let flag = "CSCG{redacted}".to_string();//env::var("CSCG_VM_FLAG").unwrap_or();
     mmap_unchecked_with_content(xx, flag.as_bytes(), Perm::None, &mut memory, &mut verifier);
 
     let do_run_validator = Arc::new(AtomicBool::new(true));
@@ -1476,10 +1479,10 @@ fn main() {
                     continue;
                 }
             }
-
             if send.send(result).is_err() {
                 break;
             }
+            println!("Sent execution");
         }
     });
 
@@ -1487,7 +1490,7 @@ fn main() {
         let execution = recv
             .recv()
             .expect("could not fetch next instruction result");
-
+        println!("recieved execution");
         if let Some(execution) = execution {
             match verifier.verify_execution(&registers, &execution) {
                 VerificationResult::Ok => {
