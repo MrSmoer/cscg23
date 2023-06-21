@@ -1,0 +1,6 @@
+FOR avc in avocado_items FILTER avc.name == 'Bacon' OR avc.name='Gem' RETURN avc\/\/
+
+
+') FOR avc in avocado_items FILTER avc.name == 'Gem' FOR avc in _collections FILTER collection.name == 'avocado_items
+
+' OR avc.name == 'Gem

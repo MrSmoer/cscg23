@@ -4,7 +4,7 @@ import random
 
 rng = random.SystemRandom()
 #CONN=remote("localhost",1024)
-CONN=remote("e8cd49a7c517870ddc388381-casino.challenge.master.cscg.live", 31337, ssl=True)
+CONN=remote("c8ddb5635148f3f0cd65c0d5-casino.challenge.master.cscg.live", 31337, ssl=True)
 
 prime = int("""
 FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
@@ -22,13 +22,11 @@ DE2BCBF6 95581718 3995497C EA956AE5 15D22618 98FA0510
 
 
 def main():
-    thirdStraight=firstStraight=secondStraight=0
     time.sleep(1)
     for i in range(10000):
         response=CONN.recvuntil("Commitment: ".encode('ascii'))
         print(response)
         values=CONN.recvuntil("\n> ".encode('ascii'))
-        #print(values)
 
         parts=values.split(', '.encode('ascii'))
         parts[2]=parts[2].split(b"\n")[0]
@@ -62,11 +60,9 @@ def main():
             response=CONN.recvuntil("Commitment: ".encode('ascii'))
             print(response)
             values=CONN.recvuntil("\n> ".encode('ascii'))
-            #print(values)
 
             parts=values.split(', '.encode('ascii'))
             parts[2]=parts[2].split(b"\n")[0]
-            #print()
             isleg=[]
             for part in parts:
                 isleg.append(legendre_symbol(int(part),prime)==1)
@@ -89,11 +85,7 @@ def main():
                 else:
                     CONN.send(b"0\n")
             print(CONN.recvuntil(b"}",timeout=2))
-        #print(lastparts)
 
-        
-
-    #print("First: "+str(firstStraight)," second: "+str(secondStraight)+" third: "+str(thirdStraight))
     CONN.close()
 
 if __name__=="__main__":

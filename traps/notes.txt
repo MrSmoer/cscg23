@@ -1,0 +1,4 @@
+child sends ptrace
+
+first time,
+return ffffffffffffffda -> -38

