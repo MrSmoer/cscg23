@@ -7,7 +7,7 @@ Those are my solves for the CSCG 2023
 |Ghost Flag| yes | no docs at all|
 |Intro forensics 1| yes | no docs|
 |Intro forensics 2| yes | writeup|
-|Intro forensics 3| no  |    -   |
+|Intro forensics 3| no  | [just use the script from last year .... :pensive:](https://github.com/violetdev/CTF-CSCG2022)  |
 |Wreaking Havoc| no | - |
 |Breaking the iCE | yes | writeup|
 |Folders| yes| no docs|
